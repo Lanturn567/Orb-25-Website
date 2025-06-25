@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Pokemon DLKL - Destiny Awaits.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Twinkle+Star&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://kit.fontawesome.com/c6c32606ea.js" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div class="starfield">
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+    </div>
+
+    <div class="header-bg">
+      <img class="header-image" src="assets/logo.png">
+
+      <div class="header-main">
+        <button class="header-main-button">HOME</button>
+        <button class="header-main-button">NEWS</button>
+        <button class="header-main-button">CHARACTERS</button>
+      </div>
+
+      <div class="header-circles">
+        <button id="volume-button" class="header-circle-button">
+          <i id="volume-icon" class="fa-solid fa-volume-mute"></i>
+        </button>
+
+        <button class="header-circle-button">
+          <i class="fa-solid fa-earth-asia"></i>
+        </button>
+
+        <button id="share-button" class="header-circle-button" onclick="toggleShareMenu()">
+          <i class="fa-solid fa-share-nodes"></i>
+        </button>
+
+      </div>
+    </div>
+
+    <div id="share-menu" class="share-menu hidden">
+      <a href="https://x.com/PokemonDLKL" target="_blank">
+        <button class="social-button">
+          <i class="fa-brands fa-twitter"></i>
+        </button>
+      </a>
+
+      <a href="https://discord.gg/xDKSp4zm" target="_blank">
+        <button class="social-button">
+          <i class="fa-brands fa-discord"></i>
+        </button>
+      </a>
+
+      <a href="https://www.instagram.com/pokemondlkl/" target="_blank">
+        <button class="social-button">
+          <i class="fa-brands fa-instagram"></i>
+        </button>
+      </a>
+
+      <a href="https://www.tiktok.com/tag/pokemon?lang=en" target="_blank">
+        <button class="social-button">
+          <i class="fa-brands fa-tiktok"></i>
+        </button>
+      </a>
+    </div>
+
+    <div class="welcome-container">
+      <p class="welcome">WELCOME!</p>
+      <p class="welcome-body">To The World Of Pokemon DLKL!</p>
+    </div>
+
+    <iframe class="vid-container" src="https://www.youtube.com/embed/SJbhCVyV_Ys"></iframe>
+    <p class="vid-text">
+      <i class="fa-solid fa-crown"></i>
+      Pokemon DLKL Trailer Video!
+      <i class="fa-solid fa-crown"></i>
+    </p>
+
+    <hr style="height: 2px; background-color: #c6b7fe;">
+
+
+    <div class="desc-wrapper">
+      <div class="desc-images">
+        <div style="width: 120px; height: 120px;"></div>
+        <div></div>
+        <img src="assets/chichou.gif" alt="Left Pokémon1">
+        <div></div>
+        <div></div>
+        <img src="assets/gardevoir.gif" alt="Left Pokémon2">
+        <div></div>
+        <div></div>
+      </div>
+
+      <div class="desc">
+        <p class="desc-header">In a world shaped by legends and shadowed by forgotten truths, your journey begins anew.</p>
+        <p class="desc-body">Explore a vast new region teeming with mysterious Pokemon, enigmatic locations and rival trainers whose fates are deeply intertwined with your own.</p>
+        <p class="desc-body">Forge your path through shimmering cities, elemental forests, and storm-swept peaks as you uncover the power hidden within yourself.</p>
+        <p class="desc-body">Battles will test your strength. Choices will define your story.</p>
+        <p class="desc-body">And the bonds you form will echo through time.</p>
+        <p class="desc-clincher">Your destiny isn't written... It's waiting to be claimed.</p>
+      </div>
+
+      <div class="desc-images">
+        <div style="width: 120px; height: 120px;"></div>
+        <div></div>
+        <div></div>
+        <img src="assets/lanturn.gif" alt="Right Pokémon1">
+        <div></div>
+        <div></div>
+        <img src="assets/rowlet.gif" alt="Right Pokémon2">
+        <div></div>
+        <div></div>
+        <img src="assets/raichu.gif" alt="Right Pokémon3">
+      </div>
+    </div>
+
+    <hr style="height: 2px; background-color: #c6b7fe;">
+
+
+    <audio class="bgm" id="background-music" loop>
+      <source src="assets/bgm.mp3" type="audio/mpeg" />
+    </audio>
+
+
+    <script>
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const volumeButton = document.getElementById('volume-button');
+        const volumeIcon = document.getElementById('volume-icon');
+        const backgroundMusic = document.getElementById('background-music');
+        const shareMenu = document.getElementById('share-menu');
+        const shareButton = document.getElementById('share-button');
+
+        backgroundMusic.pause();
+
+        volumeButton.addEventListener('click', () => {
+          if (backgroundMusic.paused) {
+            backgroundMusic.play();
+            volumeIcon.classList.replace('fa-volume-mute', 'fa-volume-high');
+          } else {
+            backgroundMusic.pause();
+            volumeIcon.classList.replace('fa-volume-high', 'fa-volume-mute');
+          }
+        });
+
+        shareButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          shareMenu.classList.toggle('open');
+        });
+
+        // Hide when clicking outside
+        document.addEventListener('click', (event) => {
+          if (!shareMenu.contains(event.target) && !shareButton.contains(event.target)) {
+            shareMenu.classList.remove('open');
+          }
+        });
+
+        // Hide on scroll or resize
+        window.addEventListener('scroll', () => {
+          shareMenu.classList.remove('open');
+        });
+
+        window.addEventListener('resize', () => {
+          shareMenu.classList.remove('open');
+        });
+      });
+
+    </script>
+
+  </body>
+</html>
