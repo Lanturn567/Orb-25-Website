@@ -1,0 +1,825 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" type="image/png" href="{% static 'hello/assets/icon.png' %}">
+        <title>Pokemon DLKL - Destiny Awaits.</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Twinkle+Star&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'hello/css/style.css' %}">
+        <script src="https://kit.fontawesome.com/c6c32606ea.js" crossorigin="anonymous"></script>
+    </head>
+
+    <body>
+        <div class="starfield">
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+            <div class="star"></div>
+        </div>
+
+        <div class="comet-container">
+            <div class="comet comet-rtl"></div>
+            <div class="comet comet-rtl comet-2"></div>
+            <div class="comet comet-rtl comet-3"></div>
+        </div>
+
+        <div class="header-bg">
+            <img class="header-image" src="{% static 'hello/assets/logo.png' %}">
+
+            <div class="header-main">
+                <button class="header-main-button">HOME</button>
+                <button class="header-main-button">DOWNLOAD</button>
+                <button class="header-main-button">NEWS</button>
+                <button class="header-main-button">CHARACTERS</button>
+            </div>
+
+            <div class="header-circles">
+                <button id="volume-button" class="header-circle-button">
+                    <i id="volume-icon" class="fa-solid fa-volume-mute"></i>
+                </button>
+
+                <button class="header-circle-button">
+                    <i class="fa-solid fa-earth-asia"></i>
+                </button>
+
+                <button id="share-button" class="header-circle-button" onclick="toggleShareMenu()">
+                    <i class="fa-solid fa-share-nodes"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="share-menu" class="share-menu hidden">
+            <a href="https://x.com/PokemonDLKL" target="_blank">
+                <button class="social-button">
+                    <i class="fa-brands fa-twitter"></i>
+                </button>
+            </a>
+
+            <a href="https://discord.gg/xDKSp4zm" target="_blank">
+                <button class="social-button">
+                    <i class="fa-brands fa-discord"></i>
+                </button>
+            </a>
+
+            <a href="https://www.instagram.com/pokemondlkl/" target="_blank">
+                <button class="social-button">
+                    <i class="fa-brands fa-instagram"></i>
+                </button>
+            </a>
+
+            <a href="https://www.tiktok.com/tag/pokemon?lang=en" target="_blank">
+                <button class="social-button">
+                    <i class="fa-brands fa-tiktok"></i>
+                </button>
+            </a>
+        </div>
+
+        <div class="welcome-container">
+            <p class="welcome">WELCOME!</p>
+            <p class="welcome-body">To The World Of Pokemon DLKL!</p>
+        </div>
+
+        <div class="flex-row-wrapper">
+            <div class="interactive-box" onclick="location.href='{% url 'trivia:index' %}'">
+                <img src="{% static 'hello/assets/clicker.png' %}" alt="App One Icon" class="box-icon">
+                <div class="box-title">Clicker Game</div>
+                <div class="box-description">Tap & Evolve!</div>
+            </div>
+
+            <div class="video-content">
+                <iframe class="vid-container" src="https://www.youtube.com/embed/SJbhCVyV_Ys" allowfullscreen></iframe>
+                <p class="vid-text">
+                    <i class="fa-solid fa-crown"></i>
+                    Pokemon DLKL Trailer Video!
+                    <i class="fa-solid fa-crown"></i>
+                </p>
+            </div>
+
+            <div class="interactive-box" onclick="location.href='{% url 'timer:index' %}'">
+                <img src="{% static 'hello/assets/pomodoro.png' %}" alt="App One Icon" class="box-icon">
+                <div class="box-title">Pomodoro Timer</div>
+                <div class="box-description">Stay on track!</div>
+            </div>
+        </div>
+
+        <hr style="height: 4px; background-color: #c6b7fe; border: 0">
+
+        <div class="desc-wrapper">
+            <div class="desc-images left-images">
+                <div class="pokemon-gif-container">
+                    <img src="{% static 'hello/assets/chichou.gif' %}" alt="Chinchou" class="pokemon-gif">
+                </div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div class="pokemon-gif-container">
+                    <img src="{% static 'hello/assets/gardevoir.gif' %}" alt="Gardevoir" class="pokemon-gif">
+                </div>
+            </div>
+
+            <div class="desc">
+                <h2 class="section-title">Welcome to the DLKL Region!</h2>
+                <p class="desc-header">In a world shaped by legends and shadowed by forgotten truths, your journey begins anew.</p>
+                <p class="desc-body">Explore a vast new region teeming with mysterious Pokemon, enigmatic locations and rival trainers whose fates are deeply intertwined with your own.</p>
+                <p class="desc-body">Forge your path through shimmering cities, elemental forests, and storm-swept peaks as you uncover the power hidden within yourself.</p>
+                <p class="desc-body">Battles will test your strength. Choices will define your story.</p>
+                <p class="desc-body">And the bonds you form will echo through time.</p>
+                <p class="desc-clincher">Your destiny isn't written... It's waiting to be claimed.</p>
+            </div>
+
+            <div class="desc-images right-images">
+                <div class="pokemon-gif-container">
+                    <img src="{% static 'hello/assets/lanturn.gif' %}" alt="Lanturn" class="pokemon-gif">
+                </div>
+                <div></div>
+                <div class="pokemon-gif-container">
+                    <img src="{% static 'hello/assets/rowlet.gif' %}" alt="Rowlet" class="pokemon-gif">
+                </div>
+                <div></div>
+                <div></div>
+                <div class="pokemon-gif-container">
+                    <img src="{% static 'hello/assets/raichu.gif' %}" alt="Raichu" class="pokemon-gif">
+                </div>
+            </div>
+        </div>
+
+        <hr style="height: 4px; background-color: #c6b7fe; margin-bottom: 50px; border: 0px">
+
+        <div class="download-section">
+            <h2 class="download-title">Download Pokémon DLKL Now!</h2>
+            <p class="download-subtitle">Begin your adventure today</p>
+
+            <div class="download-buttons">
+                <div class="download-platform">
+                    <i class="fa-brands fa-windows"></i>
+                    <a href="{% url 'hello:download' 'windows' %}" class="download-button windows">
+                        Download for Windows
+                        <span class="download-size">(128 MB)</span>
+                    </a>
+                </div>
+
+                <div class="download-platform">
+                    <i class="fa-brands fa-apple"></i>
+                    <a href="{% url 'hello:download' 'mac' %}" class="download-button mac">
+                        Download for Mac
+                        <span class="download-size">(128 MB)</span>
+                    </a>
+                </div>
+
+                <div class="download-platform">
+                    <i class="fa-brands fa-android"></i>
+                    <button class="download-button android" disabled>
+                        Download for Android
+                        <span class="download-size">(Coming Soon!)</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="system-requirements">
+                <h3>System Requirements</h3>
+                <div class="requirements-grid">
+                    <div class="requirement">
+                        <h4>Windows</h4>
+                        <ul>
+                            <li>OS: Windows 10/11</li>
+                            <li>Processor: Intel Core i5</li>
+                            <li>Memory: 4GB RAM</li>
+                            <li>Graphics: Intel HD Graphics 4000</li>
+                            <li>Storage: 2GB available space</li>
+                        </ul>
+                    </div>
+                    <div class="requirement">
+                        <h4>Mac</h4>
+                        <ul>
+                            <li>OS: macOS 10.15+</li>
+                            <li>Processor: Apple M1 or Intel Core i5</li>
+                            <li>Memory: 4GB RAM</li>
+                            <li>Graphics: Metal capable GPU</li>
+                            <li>Storage: 2GB available space</li>
+                        </ul>
+                    </div>
+                    <div class="requirement">
+                        <h4>Android</h4>
+                        <ul>
+                            <li>OS: Android 8.0+</li>
+                            <li>Processor: Snapdragon 660 or equivalent</li>
+                            <li>Memory: 3GB RAM</li>
+                            <li>Storage: 1GB available space</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr style="height: 4px; background-color: #c6b7fe; border: 0px">
+
+        <!-- News Section -->
+        <div class="news-section">
+            <h2 class="news-title">Latest Updates</h2>
+            <p class="news-subtitle">#PokemonDLKL on social media!</p>
+
+            <div class="twitter-slider">
+                <div class="twitter-slider-container">
+                    <!-- Tweet 1 -->
+                    <div class="twitter-post">
+                        <div class="tweet-content">
+                            <div class="tweet-header">
+                                <img src="{% static 'hello/assets/icon.png' %}" class="tweet-avatar">
+                                <div class="tweet-user">
+                                    <span class="tweet-name">Pokémon DLKL</span>
+                                    <span class="tweet-username">@PokemonDLKL</span>
+                                </div>
+                            </div>
+                            <div class="tweet-text">
+                                Just revealed! Meet the new legendary Pokémon for DLKL - meet Cloud, the One Above!
+                            </div>
+                            <div class="tweet-image">
+                                <img src="{% static 'hello/assets/cloud.png' %}" alt="New Legendary Pokémon">
+                            </div>
+                            <div class="tweet-footer">
+                                <span class="tweet-date">May 15, 2025</span>
+                                <div class="tweet-stats">
+                          <span class="like-button" data-tweet="1" data-liked="false">
+                            <i class="fa-regular fa-heart"></i>
+                            <span class="like-count">1.2K</span>
+                          </span>
+                                    <span class="retweet-button" data-tweet="1" data-retweeted="false">
+                            <i class="fa-solid fa-retweet"></i>
+                            <span class="retweet-count">458</span>
+                          </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tweet 2 -->
+                    <div class="twitter-post">
+                        <div class="tweet-content">
+                            <div class="tweet-header">
+                                <img src="{% static 'hello/assets/icon.png' %}" class="tweet-avatar">
+                                <div class="tweet-user">
+                                    <span class="tweet-name">Pokémon DLKL</span>
+                                    <span class="tweet-username">@PokemonDLKL</span>
+                                </div>
+                            </div>
+                            <div class="tweet-text">
+                                The DLKL region map has been updated with new locations! Which area are you most excited to explore?
+                            </div>
+                            <div class="tweet-image">
+                                <img src="{% static 'hello/assets/map.png' %}" alt="DLKL Region Map">
+                            </div>
+                            <div class="tweet-footer">
+                                <span class="tweet-date">May 10, 2025</span>
+                                <div class="tweet-stats">
+                          <span class="like-button" data-tweet="2" data-liked="false">
+                            <i class="fa-regular fa-heart"></i>
+                            <span class="like-count">2.4K</span>
+                          </span>
+                                    <span class="retweet-button" data-tweet="2" data-retweeted="false">
+                            <i class="fa-solid fa-retweet"></i>
+                            <span class="retweet-count">892</span>
+                          </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tweet 3 -->
+                    <div class="twitter-post">
+                        <div class="tweet-content">
+                            <div class="tweet-header">
+                                <img src="{% static 'hello/assets/icon.png' %}" class="tweet-avatar">
+                                <div class="tweet-user">
+                                    <span class="tweet-name">Pokémon DLKL</span>
+                                    <span class="tweet-username">@PokemonDLKL</span>
+                                </div>
+                            </div>
+                            <div class="tweet-text">
+                                Community Spotlight: Amazing fan art of our new starter Pokemon! Tag us with your creations using #PokemonDLKL
+                            </div>
+                            <div class="tweet-image">
+                                <img src="{% static 'hello/assets/fanart.png' %}" alt="Fan Art">
+                            </div>
+                            <div class="tweet-footer">
+                                <span class="tweet-date">May 5, 2025</span>
+                                <div class="tweet-stats">
+                          <span class="like-button" data-tweet="3" data-liked="false">
+                            <i class="fa-regular fa-heart"></i>
+                            <span class="like-count">3.1K</span>
+                          </span>
+                                    <span class="retweet-button" data-tweet="3" data-retweeted="false">
+                            <i class="fa-solid fa-retweet"></i>
+                            <span class="retweet-count">1.2K</span>
+                          </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tweet 4 -->
+                    <div class="twitter-post">
+                        <div class="tweet-content">
+                            <div class="tweet-header">
+                                <img src="{% static 'hello/assets/icon.png' %}" class="tweet-avatar">
+                                <div class="tweet-user">
+                                    <span class="tweet-name">Pokémon DLKL</span>
+                                    <span class="tweet-username">@PokemonDLKL</span>
+                                </div>
+                            </div>
+                            <div class="tweet-text">
+                                Developer Diary: Behind the scenes of creating the unique battle mechanics for Pokémon DLKL
+                            </div>
+                            <div class="tweet-image">
+                                <img src="{% static 'hello/assets/dev.png' %}" alt="Developer Diary">
+                            </div>
+                            <div class="tweet-footer">
+                                <span class="tweet-date">April 28, 2025</span>
+                                <div class="tweet-stats">
+                          <span class="like-button" data-tweet="4" data-liked="false">
+                            <i class="fa-regular fa-heart"></i>
+                            <span class="like-count">4.7K</span>
+                          </span>
+                                    <span class="retweet-button" data-tweet="4" data-retweeted="false">
+                            <i class="fa-solid fa-retweet"></i>
+                            <span class="retweet-count">2.3K</span>
+                          </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="slider-button prev" onclick="moveSlider(-1)">❮</button>
+                <button class="slider-button next" onclick="moveSlider(1)">❯</button>
+            </div>
+
+            <div class="slider-dots">
+                <span class="dot active" onclick="goToSlide(0)"></span>
+                <span class="dot" onclick="goToSlide(1)"></span>
+                <span class="dot" onclick="goToSlide(2)"></span>
+                <span class="dot" onclick="goToSlide(3)"></span>
+            </div>
+        </div>
+
+        <!-- Add this after the news section -->
+        <hr style="height: 4px; background-color: #c6b7fe; border: 0">
+
+        <div class="characters-section">
+            <h2 class="characters-title">Meet the Characters</h2>
+            <p class="characters-subtitle">Your companions on this journey</p>
+
+            <div class="character-grid">
+                <!-- Character 1 -->
+                <div class="character-card">
+                    <div class="character-image">
+                        <img src="{% static 'hello/assets/prof.webp' %}" alt="Professor Willow">
+                        <div class="character-type-badge grass">Grass Expert</div>
+                    </div>
+                    <div class="character-info">
+                        <h3>Professor Lek</h3>
+                        <p class="character-role">Region Professor</p>
+                        <p class="character-desc">The kind-hearted professor who provides starters to new trainers. Loves all Pokemon.</p>
+                        <div class="character-stats">
+                            <span><i class="fa-solid fa-heart"></i> 85</span>
+                            <span><i class="fa-solid fa-bolt"></i> 70</span>
+                            <span><i class="fa-solid fa-shield"></i> 65</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Character 2 -->
+                <div class="character-card">
+                    <div class="character-image">
+                        <img src="{% static 'hello/assets/champ.webp' %}" alt="Rival Blaze">
+                        <div class="character-type-badge fire">Fire Expert</div>
+                    </div>
+                    <div class="character-info">
+                        <h3>Rhymond</h3>
+                        <p class="character-role">Your Rival</p>
+                        <p class="character-desc">Your childhood friend turned rival. Always one step ahead with his Fire-type team.</p>
+                        <div class="character-stats">
+                            <span><i class="fa-solid fa-heart"></i> 75</span>
+                            <span><i class="fa-solid fa-bolt"></i> 90</span>
+                            <span><i class="fa-solid fa-shield"></i> 60</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Character 3 -->
+                <div class="character-card">
+                    <div class="character-image">
+                        <img src="{% static 'hello/assets/rival.png' %}" alt="Champion Marina">
+                        <div class="character-type-badge water">Water Expert</div>
+                    </div>
+                    <div class="character-info">
+                        <h3>Lanturn</h3>
+                        <p class="character-role">Prof's Assistant</p>
+                        <p class="character-desc">The assistant with mastery over Water-types. Her team is nearly unbeatable.</p>
+                        <div class="character-stats">
+                            <span><i class="fa-solid fa-heart"></i> 95</span>
+                            <span><i class="fa-solid fa-bolt"></i> 85</span>
+                            <span><i class="fa-solid fa-shield"></i> 90</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Character 4 -->
+                <div class="character-card">
+                    <div class="character-image">
+                        <img src="{% static 'hello/assets/raysen.png' %}" alt="Team Shadow Leader">
+                        <div class="character-type-badge dark">Dark Expert</div>
+                    </div>
+                    <div class="character-info">
+                        <h3>Raysen</h3>
+                        <p class="character-role">Eskrew Gym Leader</p>
+                        <p class="character-desc">The gym leader who dominates Dark-type engagements.</p>
+                        <div class="character-stats">
+                            <span><i class="fa-solid fa-heart"></i> 80</span>
+                            <span><i class="fa-solid fa-bolt"></i> 95</span>
+                            <span><i class="fa-solid fa-shield"></i> 75</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Character 5 -->
+                <div class="character-card">
+                    <div class="character-image">
+                        <img src="{% static 'hello/assets/sebastian.png' %}" alt="Gym Leader Terra">
+                        <div class="character-type-badge rock">Rock Expert</div>
+                    </div>
+                    <div class="character-info">
+                        <h3>Sebastian</h3>
+                        <p class="character-role">Stonepeak Gym Leader</p>
+                        <p class="character-desc">The sturdy first gym leader who tests trainers with her Rock-type defenses.</p>
+                        <div class="character-stats">
+                            <span><i class="fa-solid fa-heart"></i> 70</span>
+                            <span><i class="fa-solid fa-bolt"></i> 65</span>
+                            <span><i class="fa-solid fa-shield"></i> 85</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Character 6 -->
+                <div class="character-card">
+                    <div class="character-image">
+                        <img src="{% static 'hello/assets/dom.png' %}" alt="Gym Leader Zephyr">
+                        <div class="character-type-badge flying">Flying Expert</div>
+                    </div>
+                    <div class="character-info">
+                        <h3>Dominique</h3>
+                        <p class="character-role">Skyview Gym Leader</p>
+                        <p class="character-desc">The free-spirited Flying-type specialist who loves aerial battles.</p>
+                        <div class="character-stats">
+                            <span><i class="fa-solid fa-heart"></i> 65</span>
+                            <span><i class="fa-solid fa-bolt"></i> 80</span>
+                            <span><i class="fa-solid fa-shield"></i> 70</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="site-footer">
+            <p>© 2025 Pokemon DLKL. All rights reserved.</p>
+            <p>Pokemon and Pokemon character names are trademarks of Nintendo.</p>
+        </footer>
+
+        <audio class="bgm" id="background-music" loop>
+            <source src="{% static 'hello/assets/bgm.mp3' %}" type="audio/mpeg" />
+        </audio>
+
+        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const volumeButton = document.getElementById('volume-button');
+                const volumeIcon = document.getElementById('volume-icon');
+                const backgroundMusic = document.getElementById('background-music');
+                const shareMenu = document.getElementById('share-menu');
+                const shareButton = document.getElementById('share-button');
+
+                // Set initial state
+                backgroundMusic.volume = 0.2; // Set default volume to 50%
+                backgroundMusic.pause(); // Start paused
+                let isFirstClick = true;
+
+                document.addEventListener('pointerdown', () => {
+                    if (isFirstClick) {
+                        // First click - play music and show volume high icon
+                        backgroundMusic.play()
+                            .then(() => {
+                                volumeIcon.classList.replace('fa-volume-mute', 'fa-volume-high');
+                                isFirstClick = false;
+                            })
+                            .catch(error => {
+                                console.error('Audio playback failed:', error);
+                            });
+                    }
+                });
+
+                volumeButton.addEventListener('click', () => {
+                    if (backgroundMusic.paused) {
+                        backgroundMusic.play();
+                        volumeIcon.classList.replace('fa-volume-mute', 'fa-volume-high');
+                    } else {
+                        backgroundMusic.pause();
+                        volumeIcon.classList.replace('fa-volume-high', 'fa-volume-mute');
+                    }
+                });
+
+                shareButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    shareMenu.classList.toggle('open');
+                });
+
+                document.addEventListener('click', (event) => {
+                    if (!shareMenu.contains(event.target) && !shareButton.contains(event.target)) {
+                        shareMenu.classList.remove('open');
+                    }
+                });
+
+                window.addEventListener('scroll', () => {
+                    shareMenu.classList.remove('open');
+                });
+
+                window.addEventListener('resize', () => {
+                    shareMenu.classList.remove('open');
+                });
+
+                // Download button functionality
+                document.querySelectorAll('.download-button').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const platform = this.classList.contains('windows') ? 'Windows' :
+                            this.classList.contains('mac') ? 'Mac' : 'Android';
+                        alert(`Starting download for ${platform} version...\n :D Thanks for playing Pokemon DLKL! :D\n`);
+                        this.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Preparing download...`;
+                        setTimeout(() => {
+                            this.innerHTML = `Download for ${platform} <span class="download-size">(${this.querySelector('.download-size').textContent})</span>`;
+                        }, 2000);
+                    });
+                });
+
+                // Like and Retweet functionality
+                document.querySelectorAll('.like-button').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const tweetId = this.getAttribute('data-tweet');
+                        const isLiked = this.getAttribute('data-liked') === 'true';
+                        const countElement = this.querySelector('.like-count');
+                        const icon = this.querySelector('i');
+
+                        if (isLiked) {
+                            // Unlike
+                            this.setAttribute('data-liked', 'false');
+                            this.classList.remove('liked');
+                            icon.classList.replace('fa-solid', 'fa-regular');
+                            countElement.textContent = formatCount(parseCount(countElement.textContent) - 1);
+                        } else {
+                            // Like
+                            this.setAttribute('data-liked', 'true');
+                            this.classList.add('liked');
+                            icon.classList.replace('fa-regular', 'fa-solid');
+                            countElement.textContent = formatCount(parseCount(countElement.textContent) + 1);
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.retweet-button').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const tweetId = this.getAttribute('data-tweet');
+                        const isRetweeted = this.getAttribute('data-retweeted') === 'true';
+                        const countElement = this.querySelector('.retweet-count');
+                        const icon = this.querySelector('i');
+
+                        if (isRetweeted) {
+                            // Un-retweet
+                            this.setAttribute('data-retweeted', 'false');
+                            this.classList.remove('retweeted');
+                            countElement.textContent = formatCount(parseCount(countElement.textContent) - 1);
+                        } else {
+                            // Retweet
+                            this.setAttribute('data-retweeted', 'true');
+                            this.classList.add('retweeted');
+                            countElement.textContent = formatCount(parseCount(countElement.textContent) + 1);
+                        }
+                    });
+                });
+
+                // Helper functions to handle count formatting (1.2K, 458, etc.)
+                function parseCount(countStr) {
+                    if (countStr.includes('K')) {
+                        return Math.round(parseFloat(countStr) * 1000);
+                    }
+                    return parseInt(countStr.replace(/,/g, ''));
+                }
+
+                function formatCount(count) {
+                    if (count >= 1000) {
+                        return (count / 1000).toFixed(1) + 'K';
+                    }
+                    return count.toString();
+                }
+
+                const descSection = document.querySelector('.desc-wrapper');
+                const reqsSection = document.querySelector('.system-requirements');
+                const requirementsGrid = document.querySelector('.requirements-grid');
+                const requirements = document.querySelectorAll('.requirement');
+
+                const observerOptions = {
+                    threshold: 0.2,
+                    rootMargin: '0px 0px -100px 0px'
+                };
+
+                const descObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('animate');
+                            const leftImages = entry.target.querySelector('.desc-images:first-child');
+                            leftImages.classList.add('animate-left-images');
+                            const rightImages = entry.target.querySelector('.desc-images:last-child');
+                            rightImages.classList.add('animate-right-images');
+                            descObserver.unobserve(entry.target);
+                        }
+                    });
+                }, observerOptions);
+
+                const reqsObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('show');
+                            requirementsGrid.classList.add('show');
+                            requirements.forEach((req, index) => {
+                                setTimeout(() => {
+                                    req.classList.add('show');
+                                }, index * 200);
+                            });
+                            reqsObserver.unobserve(entry.target);
+                        }
+                    });
+                }, observerOptions);
+
+                if (descSection) descObserver.observe(descSection);
+                if (reqsSection) reqsObserver.observe(reqsSection);
+
+                // Setup mobile menu
+                setupMobileMenu();
+            });
+
+            // Twitter Slider Functionality
+            let currentSlide = 0;
+            const slides = document.querySelectorAll('.twitter-post');
+            const dots = document.querySelectorAll('.dot');
+            let autoAdvanceInterval;
+
+            function startAutoAdvance() {
+                if (autoAdvanceInterval) {
+                    clearInterval(autoAdvanceInterval);
+                }
+                autoAdvanceInterval = setInterval(() => moveSlider(1), 5000);
+            }
+
+            function showSlide(index) {
+                if (index >= slides.length) index = 0;
+                if (index < 0) index = slides.length - 1;
+
+                document.querySelector('.twitter-slider-container').style.transform =
+                    `translateX(-${index * 100}%)`;
+
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+
+                currentSlide = index;
+                startAutoAdvance();
+            }
+
+            function moveSlider(direction) {
+                showSlide(currentSlide + direction);
+            }
+
+            function goToSlide(index) {
+                showSlide(index);
+            }
+
+            const slider = document.querySelector('.twitter-slider');
+            slider.addEventListener('mouseenter', () => {
+                clearInterval(autoAdvanceInterval);
+            });
+
+            slider.addEventListener('mouseleave', () => {
+                startAutoAdvance();
+            });
+
+            function setupMobileMenu() {
+                const menuButtons = document.querySelector('.header-main');
+                const menuToggle = document.querySelector('.mobile-menu-toggle') || document.createElement('button');
+
+                if (window.innerWidth < 768 && !document.querySelector('.mobile-menu-toggle')) {
+                    menuToggle.className = 'mobile-menu-toggle';
+                    menuToggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
+
+                    const headerCircles = document.querySelector('.header-circles');
+                    headerCircles.insertAdjacentElement('afterend', menuToggle);
+
+                    menuButtons.classList.add('mobile-hidden');
+
+                    menuToggle.addEventListener('click', () => {
+                        const isOpening = !menuButtons.classList.contains('mobile-visible');
+
+                        if (isOpening) {
+                            // When opening
+                            menuButtons.classList.remove('mobile-hidden');
+                            menuButtons.classList.add('mobile-visible');
+                            menuToggle.classList.add('active');
+                        } else {
+                            // When closing
+                            menuButtons.classList.remove('mobile-visible');
+                            menuToggle.classList.remove('active');
+
+                            // Wait for animation to complete before hiding
+                            setTimeout(() => {
+                                menuButtons.classList.add('mobile-hidden');
+                            }, 300); // Match this with your CSS transition time
+                        }
+                    });
+                } else if (window.innerWidth >= 768) {
+                    menuButtons.classList.remove('mobile-hidden', 'mobile-visible');
+                    if (document.querySelector('.mobile-menu-toggle')) {
+                        document.querySelector('.mobile-menu-toggle').remove();
+                    }
+                }
+            }
+
+            // Navigation scroll functionality
+            function scrollToSection(section) {
+                if (section) {
+                    window.scrollTo({
+                        top: section.offsetTop - 80, // Adjust for header height
+                        behavior: 'smooth'
+                    });
+                } else {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+
+            // Get the navigation buttons
+            const homeButton = document.querySelector('.header-main-button:nth-child(1)');
+            const newsButton = document.querySelector('.header-main-button:nth-child(3)');
+            const charactersButton = document.querySelector('.header-main-button:nth-child(4)');
+            const downloadButton = document.querySelector('.header-main-button:nth-child(2)');
+
+            // Get the sections
+            const homeSection = document.querySelector('.welcome-container');
+            const downSection = document.querySelector('.download-section');
+            const newsSection = document.querySelector('.news-section');
+            const charactersSection = document.querySelector('.characters-section');
+
+            // Add click event listeners
+            if (homeButton) homeButton.addEventListener('click', () => scrollToSection(homeSection));
+            if (downloadButton) downloadButton.addEventListener('click', () => scrollToSection(downSection));
+            if (newsButton) newsButton.addEventListener('click', () => scrollToSection(newsSection));
+            if (charactersButton) charactersButton.addEventListener('click', () => scrollToSection(charactersSection));
+
+            // Update the buttons to indicate current section
+            window.addEventListener('scroll', () => {
+                const scrollPosition = window.scrollY + 100; // Adding buffer
+
+                // Clear all active states first
+                if (homeButton) homeButton.classList.remove('active');
+                if (newsButton) newsButton.classList.remove('active');
+                if (downloadButton) downloadButton.classList.remove('active');
+                if (charactersButton) charactersButton.classList.remove('active');
+
+                // Determine which section is in view
+                if (charactersSection && scrollPosition >= charactersSection.offsetTop) {
+                    if (charactersButton) charactersButton.classList.add('active');
+                } else if (newsSection && scrollPosition >= newsSection.offsetTop) {
+                    if (newsButton) newsButton.classList.add('active');
+                } else if (downloadButton && scrollPosition >= downSection.offsetTop) {
+                    if (downloadButton) downloadButton.classList.add('active');
+                } else {
+                    if (homeButton) homeButton.classList.add('active');
+                }
+            });
+
+            // Initialize
+            showSlide(0);
+            startAutoAdvance();
+
+            // Handle window resize
+            window.addEventListener('resize', setupMobileMenu);
+        </script>
+    </body>
+</html>

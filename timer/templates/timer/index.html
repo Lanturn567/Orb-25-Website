@@ -1,0 +1,1005 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link id="favicon" rel="icon" sizes="32x32" type="image/png" href="{% static 'hello/assets/icon.png' %}">
+    <title>Pokemon DLKL Pomodoro Timer!</title>
+    <link rel="stylesheet" href="{% static 'timer/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Twinkle+Star&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="header-bg">
+    <div class="header-main">
+        <button class="header-main-button" onclick="location.href='{% url 'hello:index' %}'">
+            HOME
+        </button>
+    </div>
+
+    <div class="header-images">
+        <img class="header-image" src="{% static 'timer/assets/Buneary.png' %}">
+        <img class="header-image" src="{% static 'timer/assets/Chandelure.png' %}">
+        <img class="header-image" src="{% static 'timer/assets/Ditto.png' %}">
+        <img class="header-image" src="{% static 'timer/assets/Rapidash.png' %}">
+        <img class="header-gif" src="{% static 'timer/assets/logo.gif' %}" style="margin-left: 10px; margin-right:10px;">
+        <img class="header-image" src="{% static 'timer/assets/Snorlax.png' %}">
+        <img class="header-image" src="{% static 'timer/assets/Luvdisc.png' %}">
+        <img class="header-image" src="{% static 'timer/assets/Maractus.png' %}">
+        <img class="header-image" src="{% static 'timer/assets/Lanturn.png' %}">
+    </div>
+
+    <div class="header-circles">
+        <button id="spotify-button" class="header-circle-button">
+            <i id="spotify-icon" class="fab fa-spotify"></i>
+        </button>
+    </div>
+
+    <div id="spotify-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Spotify Playlist</h2>
+            <div style="display: flex; justify-content: center;">
+                <button id="login-spotify">Connect Spotify</button>
+            </div>
+            <div id="spotify-loading" style="display:none;">
+                <i class="fas fa-spinner fa-spin"></i> Loading Spotify...
+            </div>
+            <div id="spotify-controls" style="display:none;">
+                <div id="now-playing">
+                    <p>Now Playing: <span id="current-track">Nothing playing</span></p>
+                </div>
+                <div class="playlist-controls">
+                    <button id="play-playlist">Play Playlist</button>
+                    <button id="pause-spotify">Pause</button>
+                    <button id="next-track">Next Track</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this div near the top of your HTML (right after the body tag) -->
+<div id="spotify-now-playing" class="hidden">
+    <div class="now-playing-content">
+        <img id="now-playing-album-art" src="{% static 'timer/assets/music-note.png' %}" alt="Album Art">
+        <div class="now-playing-info">
+            <div id="now-playing-track" class="now-playing-text">Not Playing</div>
+            <div id="now-playing-artist" class="now-playing-text">Spotify</div>
+        </div>
+        <button id="now-playing-toggle">
+            <i class="fas fa-pause"></i>
+        </button>
+    </div>
+</div>
+
+
+<div class="timer-container">
+    <img class="timer-bg" src="{% static 'timer/assets/bg.gif' %}" alt="Background">
+    <div class="timer-controls">
+        <div class="timer-status">
+            <span id="timer-mode">Pomodoro</span>
+            <span id="session-counter">Session: 1/4</span>
+        </div>
+
+        <h1 id="clock" aria-live="polite">25:00</h1>
+
+        <div class="task-input">
+            <input type="text" id="task-input" placeholder="What are you working on?" maxlength="16">
+            <button id="add-task-btn" onclick="addTask()"><i class="fas fa-plus"></i></button>
+        </div>
+
+        <div class="timer-buttons">
+            <button id="start-btn" class="timer-button">Start</button>
+            <button id="pause-btn" class="timer-button" disabled>Pause</button>
+            <button id="reset-btn" class="timer-button">Reset</button>
+        </div>
+
+        <div class="timer-settings">
+            <button class="preset-btn active" data-minutes="25" data-mode="pomodoro">Pomodoro</button>
+            <button class="preset-btn" data-minutes="5" data-mode="short-break">Short Break</button>
+            <button class="preset-btn" data-minutes="15" data-mode="long-break">Long Break</button>
+        </div>
+
+        <div class="custom-time">
+            <label for="custom-minutes">Custom (minutes):</label>
+            <input type="number" id="custom-minutes" min="1" max="120" value="25">
+            <button id="set-custom-btn">Set</button>
+        </div>
+    </div>
+</div>
+
+<audio class="bgm" id="background-music" loop>
+    <source src="{% static 'timer/assets/bgm.mp3' %}" type="audio/mpeg" />
+</audio>
+<audio id="timer-sound" src="{% static 'timer/assets/notification.mp3' %}"></audio>
+
+<script>
+    let timer;
+    let timeLeft = 25 * 60;
+    let isRunning = false;
+    let isMuted = false;
+    let currentMode = 'pomodoro';
+    let sessionCount = 1;
+    let tasks = [];
+    let currentTaskIndex = null;
+    let tickSoundEnabled = true;
+
+    // Spotify Configuration
+    const SPOTIFY_CONFIG = {
+        clientId: 'b6fe7a331be848d38f7381b58552ad54',
+        playlistId: '5ZrmyRZKod8WpQQDtLUBBc',
+        authEndpoint: 'spotify_auth/',
+        callbackEndpoint: 'spotify_callback/',
+        refreshEndpoint: 'refresh_token/'
+    };
+
+    // Spotify Player Variables
+    let spotifyPlayer = null;
+    let spotifyAccessToken = null;
+    let deviceId = null;
+    let currentTrack = null;
+    let spotifySDKLoaded = false;
+
+    function getUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        let wish = {
+            code: params.get('code') || null,
+            error: params.get('error') || null
+        };
+        console.log(wish);
+        return wish;
+    }
+
+    // Helper function to show error messages
+    // Global variables to manage toast stacking
+    let toastCount = 0;
+    const activeToasts = [];
+
+    function showErrorToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'error-toast';
+        toast.textContent = message;
+
+        // Position the toast (centered horizontally)
+        toast.style.bottom = `${20 + (toastCount * 60)}px`;
+        toastCount++;
+
+        document.body.appendChild(toast);
+        activeToasts.push(toast);
+
+        // Animate in
+        setTimeout(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translate(-50%, 0)';
+        }, 10);
+
+        // Remove after delay
+        setTimeout(() => {
+            // Animate out
+            toast.style.opacity = '0';
+            toast.style.transform = 'translate(-50%, 20px)';
+
+            // Remove from DOM after animation
+            setTimeout(() => {
+                toast.remove();
+
+                // Remove from active toasts
+                const index = activeToasts.indexOf(toast);
+                if (index > -1) {
+                    activeToasts.splice(index, 1);
+                }
+
+                // Recalculate positions for remaining toasts
+                toastCount = activeToasts.length;
+                activeToasts.forEach((t, i) => {
+                    t.style.bottom = `${20 + (i * 60)}px`;
+                });
+            }, 300); // Match this with CSS transition time
+        }, 5000);
+    }
+
+    function updateSpotifyUI(isLoggedIn) {
+        const loginButton = document.getElementById('login-spotify');
+        const spotifyControls = document.getElementById('spotify-controls');
+        const spotifyLoading = document.getElementById('spotify-loading');
+
+        if (isLoggedIn) {
+            loginButton.style.display = 'none';
+            spotifyLoading.style.display = 'none';
+            spotifyControls.style.display = 'block';
+        } else {
+            loginButton.style.display = 'block';
+            spotifyLoading.style.display = 'none';
+            spotifyControls.style.display = 'none';
+        }
+    }
+
+    function setupSpotifyModal() {
+        const spotifyButton = document.getElementById('spotify-button');
+        const spotifyModal = document.getElementById('spotify-modal');
+        const closeButton = document.querySelector('.close');
+        const loginButton = document.getElementById('login-spotify');
+        const playButton = document.getElementById('play-playlist');
+        const pauseButton = document.getElementById('pause-spotify');
+        const nextButton = document.getElementById('next-track');
+
+        // Open modal
+        spotifyButton.addEventListener('click', () => {
+            spotifyModal.style.display = 'block';
+        });
+
+        // Close modal
+        closeButton.addEventListener('click', () => {
+            spotifyModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target === spotifyModal) {
+                spotifyModal.style.display = 'none';
+            }
+        });
+
+        // Login to Spotify
+        loginButton.addEventListener('click', loginToSpotify);
+
+        // Play playlist
+        playButton.addEventListener('click', () => {
+            const backgroundMusic = document.getElementById('background-music');
+            if (spotifyPlayer) {
+                spotifyPlayer.resume();
+                backgroundMusic.pause();
+            }
+        });
+
+        // Pause playback
+        pauseButton.addEventListener('click', () => {
+            if (spotifyPlayer) {
+                spotifyPlayer.pause();
+            }
+        });
+
+        // Next track
+        nextButton.addEventListener('click', () => {
+            const backgroundMusic = document.getElementById('background-music');
+            if (spotifyPlayer) {
+                spotifyPlayer.nextTrack();
+                backgroundMusic.pause();
+            }
+        });
+    }
+
+    async function loginToSpotify() {
+        try {
+            // Show loading state
+            const loginButton = document.getElementById('login-spotify');
+            loginButton.disabled = true;
+            loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+
+            const response = await fetch(SPOTIFY_CONFIG.authEndpoint);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (!data.auth_url) {
+                throw new Error('Invalid auth URL response');
+            }
+
+            // Store current page URL for redirect back
+            localStorage.setItem('preAuthUrl', window.location.href);
+
+            // Redirect to Spotify auth
+            window.location.href = data.auth_url;
+            if (data.access_token) {
+                localStorage.setItem('spotifyAccessToken', data.access_token);
+            }
+            if (data.refresh_token) {
+                localStorage.setItem('spotifyRefreshToken', data.access_token);
+            }
+            if (data.expires_in) {
+                const expiresAt = Date.now() + data.expires_in * 1000;
+                localStorage.setItem('spotifyExpiresAt', expiresAt.toString());
+            }
+        } catch (error) {
+            console.error('Login failed:', error);
+            // Reset button state
+            const loginButton = document.getElementById('login-spotify');
+            loginButton.disabled = false;
+            loginButton.innerHTML = 'Connect Spotify';
+
+            // Show error to user
+            showErrorToast('Spotify login failed. Please try again later.');
+        }
+    }
+
+    async function refreshSpotifyToken() {
+        try {
+            const refreshToken = localStorage.getItem('spotifyRefreshToken');
+            if (!refreshToken) {
+                throw new Error('No refresh token found');
+            }
+
+            const payload = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    grant_type: 'refresh_token',
+                    refresh_token: refreshToken,
+                    client_id: SPOTIFY_CONFIG['clientId'],
+                }),
+            }
+
+            const response = await fetch('/timer/refresh_token/', payload);
+
+            if (!response.ok) {
+                throw new Error(`Failed to refresh token: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.access_token) {
+                spotifyAccessToken = data.access_token;
+                localStorage.setItem('spotifyAccessToken', data.access_token);
+                const expiresAt = Date.now() + (data.expires_in * 900);
+                localStorage.setItem('spotifyExpiresAt', expiresAt.toString());
+                if (data.refresh_token) {
+                    localStorage.setItem('spotifyRefreshToken', data.refresh_token);
+                }
+                return true;
+            }
+        } catch (error) {
+            console.error('Token refresh failed:', error);
+            updateSpotifyUI(false);
+        }
+        return false;
+    }
+
+    function initializeSpotifyPlayer() {
+        return new Promise((resolve, reject) => {
+            // Check if SDK is already loaded
+            if (window.Spotify) {
+                createSpotifyPlayer();
+                resolve();
+                return;
+            }
+
+            // Load the Spotify SDK if not already loading
+            if (!spotifySDKLoaded) {
+                spotifySDKLoaded = true;
+                const script = document.createElement('script');
+                script.src = 'https://sdk.scdn.co/spotify-player.js';
+                script.async = true;
+                script.onload = () => {
+                    window.onSpotifyWebPlaybackSDKReady = createSpotifyPlayer;
+                    resolve();
+                };
+                script.onerror = (error) => {
+                    console.error('Failed to load Spotify Web Playback SDK', error);
+                    reject(error);
+                };
+                document.body.appendChild(script);
+            }
+        });
+    }
+
+    function createSpotifyPlayer() {
+        spotifyPlayer = new Spotify.Player({
+            name: 'Pokemon Pomodoro Timer',
+            getOAuthToken: cb => {
+                cb(spotifyAccessToken);
+            },
+            volume: 0.2
+        });
+
+        // Add error listeners
+        spotifyPlayer.addListener('initialization_error', ({ message }) => {
+            console.error('Initialization Error:', message);
+            showErrorToast(`Spotify Error: ${message}`);
+        });
+
+        spotifyPlayer.addListener('authentication_error', async ({ message }) => {
+            const refreshed = await refreshSpotifyToken();
+            if (refreshed) {
+                // Update token provider in SDK
+                spotifyPlayer._options.getOAuthToken = cb => cb(spotifyAccessToken);
+
+                // Now reconnect
+                spotifyPlayer.connect();
+            } else {
+                updateSpotifyUI(false);
+                console.error('Auth Error:', message);
+                showErrorToast(`Spotify Auth Error: ${message}`);
+            }
+        });
+
+        spotifyPlayer.addListener('account_error', ({ message }) => {
+            console.error('Account Error:', message);
+            showErrorToast(`Spotify Account Error: ${message}`);
+            updateSpotifyUI(false);
+        });
+
+        spotifyPlayer.addListener('playback_error', ({ message }) => {
+            console.error('Playback Error:', message);
+            showErrorToast(`Playback Error: ${message}`);
+        });
+
+        // Add success listeners
+        spotifyPlayer.addListener('ready', ({ device_id }) => {
+            console.log('Device Ready:', device_id);
+            deviceId = device_id;
+            localStorage.setItem('spotifyDeviceId', device_id);
+            const backgroundMusic = document.getElementById('background-music');
+            if (deviceId) {
+                playSpotifyPlaylist(SPOTIFY_CONFIG.playlistId);
+            } else if (spotifyPlayer) {
+                spotifyPlayer.connect().then(success => {
+                    if (success) {
+                        playSpotifyPlaylist(SPOTIFY_CONFIG.playlistId);
+                    }
+                });
+                spotifyPlayer.pause();
+            }
+            getPlayerState();
+        });
+
+        spotifyPlayer.addListener('not_ready', ({ device_id }) => {
+            console.log('Device Disconnected:', device_id);
+            deviceId = null;
+            localStorage.removeItem('spotifyDeviceId');
+        });
+
+        // Update the player_state_changed listener
+        spotifyPlayer.addListener('player_state_changed', state => {
+            if (state) {
+                currentTrack = state.track_window?.current_track;
+                updateNowPlaying();
+                updateNowPlayingOverlay(state);
+            }
+        });
+
+        // Connect to player
+        spotifyPlayer.connect().then(success => {
+            if (success) {
+                console.log('Spotify player connected successfully');
+                updateSpotifyUI(true);
+                scheduleSpotifyTokenRefresh(3600);
+            } else {
+                console.error('Failed to connect to Spotify player');
+                showErrorToast('Failed to connect to Spotify player. Please try again.');
+            }
+        });
+    }
+
+    function scheduleSpotifyTokenRefresh(expiresInSeconds) {
+        const refreshTime = expiresInSeconds * 900; // 90% of lifespan
+        setTimeout(async () => {
+            const refreshed = await refreshSpotifyToken();
+            if (refreshed) {
+                // Update token for the player if initialized
+                if (spotifyPlayer) {
+                    spotifyPlayer._options.getOAuthToken = cb => cb(spotifyAccessToken);
+                }
+
+                // Reschedule next refresh
+                scheduleSpotifyTokenRefresh(3600); // Spotify default expiry is 1 hour
+            }
+        }, refreshTime);
+    }
+
+
+    function updateNowPlaying() {
+        const currentTrackElement = document.getElementById('current-track');
+        if (currentTrack) {
+            currentTrackElement.textContent = `${currentTrack.name} by ${currentTrack.artists[0].name}`;
+        } else {
+            currentTrackElement.textContent = 'Nothing playing';
+        }
+    }
+
+    async function getPlayerState() {
+        try {
+            if (!spotifyAccessToken) return;
+
+            const response = await fetch('https://api.spotify.com/v1/me/player', {
+                headers: {
+                    'Authorization': `Bearer ${spotifyAccessToken}`
+                }
+            });
+
+            if (response.status === 204) {
+                // No content means no active playback device or no playback
+                console.warn('No active playback or no current track (204 No Content).');
+                return null; // or handle accordingly
+            }
+
+            if (response.status === 401) {
+                console.warn('Access token expired. Refreshing...');
+                await refreshSpotifyToken();
+                return getPlayerState(); // Retry once after refresh
+            }
+
+            if (response.ok) {
+                const state = await response.json();
+                if (state && state.item) {
+                    currentTrack = state.item;
+                    updateNowPlaying();
+                } else {
+                    console.warn('No current track found in player state.');
+                }
+                return state;
+            } else {
+                const errorText = await response.text();
+                console.error('Error fetching player state:', errorText);
+            }
+        } catch (error) {
+            console.error('Failed to get player state:', error);
+        }
+    }
+
+
+    // New function to update the overlay
+    function updateNowPlayingOverlay(state) {
+        const overlay = document.getElementById('spotify-now-playing');
+        const albumArt = document.getElementById('now-playing-album-art');
+        const trackName = document.getElementById('now-playing-track');
+        const artistName = document.getElementById('now-playing-artist');
+        const toggleButton = document.getElementById('now-playing-toggle');
+
+        if (state && state.track_window?.current_track) {
+            const track = state.track_window.current_track;
+
+            // Update overlay content
+            albumArt.src = track.album.images[0]?.url || "{% static 'timer/assets/music-note.png' %}";
+            trackName.textContent = track.name;
+            artistName.textContent = track.artists.map(a => a.name).join(', ');
+
+            // Update play/pause button
+            toggleButton.innerHTML = state.paused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
+
+            // Show overlay if hidden
+            overlay.classList.remove('hidden');
+
+            // Add animation for track change
+            overlay.classList.add('track-change-animation');
+
+        } else {
+            // Hide overlay if nothing is playing
+            overlay.classList.add('hidden');
+        }
+    }
+
+    // Add click handler for the toggle button
+    document.getElementById('now-playing-toggle').addEventListener('click', () => {
+        const bgm = document.getElementById("background-music");
+        if (spotifyPlayer) {
+            spotifyPlayer.togglePlay();
+            bgm.pause();
+        }
+    });
+
+    // Update the playSpotifyPlaylist function to show overlay
+    function playSpotifyPlaylist(playlistId) {
+        if (!spotifyAccessToken || !deviceId) return;
+
+        fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${spotifyAccessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                context_uri: `spotify:playlist:${playlistId}`
+            })
+        })
+            .then(() => {
+                // Show the now playing overlay
+                document.getElementById('spotify-now-playing').classList.remove('hidden');
+            })
+            .catch(error => {
+                console.error('Playback error:', error);
+                showErrorToast('Failed to start playback');
+            });
+    }
+
+    // DOM elements
+    const clock = document.getElementById('clock');
+    const startBtn = document.getElementById('start-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const presetBtns = document.querySelectorAll('.preset-btn');
+    const timerSound = document.getElementById('timer-sound');
+    const timerModeDisplay = document.getElementById('timer-mode');
+    const sessionCounter = document.getElementById('session-counter');
+    const taskInput = document.getElementById('task-input');
+    const addTaskBtn = document.getElementById('add-task-btn');
+    const taskList = document.getElementById('task-list');
+    const customMinutesInput = document.getElementById('custom-minutes');
+    const setCustomBtn = document.getElementById('set-custom-btn');
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            document.getElementById('spotify-controls').style.display = 'none';
+            document.getElementById('login-spotify').style.display = 'block';
+            document.getElementById('spotify-loading').style.display = 'none';
+
+            // Instead of checking URL params, just check with backend:
+            const response = await fetch('/timer/check_spotify_tokens/');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.access_token) {
+                    spotifyAccessToken = data.access_token;
+                    await initializeSpotifyPlayer();
+                    updateSpotifyUI(true);
+                } else {
+                    updateSpotifyUI(false);
+                }
+            } else {
+                updateSpotifyUI(false);
+            }
+
+            setupSpotifyModal();
+        } catch (error) {
+            console.error('Initialization failed:', error);
+            updateSpotifyUI(false);
+            document.getElementById('spotify-loading').style.display = 'none';
+            document.getElementById('login-spotify').style.display = 'block';
+            showErrorToast('Failed to initialize Spotify: ' + error.message);
+        }
+
+        updateDisplay();
+        loadSettings();
+        loadTasks();
+    });
+
+    // Timer functions
+    function startTimer() {
+        if (!isRunning) {
+            isRunning = true;
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+
+            timer = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+
+                if (timeLeft <= 0) {
+                    timerComplete();
+                }
+            }, 1000);
+        }
+    }
+
+    function pauseTimer() {
+        if (isRunning) {
+            clearInterval(timer);
+            isRunning = false;
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+        }
+    }
+
+    function resetTimer(minutes) {
+        pauseTimer();
+        timeLeft = minutes * 60;
+        updateDisplay();
+        saveSettings();
+    }
+
+    function timerComplete() {
+        clearInterval(timer);
+        isRunning = false;
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+
+        if (!isMuted) {
+            timerSound.play();
+        }
+
+        // Flash animation
+        document.body.style.animation = 'flash 0.5s 3';
+        setTimeout(() => {
+            document.body.style.animation = '';
+        }, 1500);
+
+        // Auto switch mode
+        if (currentMode === 'pomodoro') {
+            sessionCount++;
+            if (sessionCount % 4 === 0) {
+                switchMode('long-break', 15);
+            } else {
+                switchMode('short-break', 5);
+            }
+        } else {
+            switchMode('pomodoro', 25);
+        }
+
+        updateSessionCounter();
+    }
+
+    function switchMode(mode, minutes) {
+        currentMode = mode;
+        resetTimer(minutes);
+
+        // Update active button
+        presetBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === mode);
+        });
+
+        // Update mode display
+        timerModeDisplay.textContent = mode === 'pomodoro' ? 'Pomodoro' :
+            mode === 'short-break' ? 'Short Break ' : 'Long Break ';
+
+        saveSettings();
+    }
+
+    function updateDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        clock.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        // Change color when time is running low
+        if (timeLeft <= 60) {
+            clock.style.color = '#ff5252';
+            clock.style.textShadow = '0 0 10px rgba(255, 82, 82, 0.7)';
+        } else {
+            clock.style.color = '#f3e5f5';
+            clock.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.2)';
+        }
+    }
+
+    function updateSessionCounter() {
+        sessionCounter.textContent = `Session: ${sessionCount % 4 || 4}/4`;
+    }
+
+    function addTask() {
+        const taskText = taskInput.value.trim();
+        if (taskText) {
+            tasks.push({
+                text: taskText,
+                completed: false,
+                x: Math.random() * (window.innerWidth - 200),
+                y: Math.random() * (window.innerHeight - 100)
+            });
+
+            taskInput.value = '';
+            renderTasks();
+            saveTasks();
+        }
+    }
+
+    function renderTasks() {
+        // Clear existing tasks
+        document.querySelectorAll('.task-container').forEach(el => el.remove());
+
+        tasks.forEach((task, index) => {
+            const taskEl = document.createElement('div');
+            taskEl.className = `task-container ${task.completed ? 'completed' : ''} ${index === currentTaskIndex ? 'active' : ''}`;
+            taskEl.style.left = `${task.x}px`;
+            taskEl.style.top = `${task.y}px`;
+            taskEl.dataset.index = index;
+
+            taskEl.innerHTML = `
+            <div class="task-content">
+                <div class="task-meta">
+                    <input type="checkbox" ${task.completed ? 'checked' : ''}>
+                </div>
+                <div class="task-text">${task.text}</div>
+                <div class="task-controls">
+                    <button class="select-task-btn">Focus</button>
+                    <button class="delete-task-btn"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        `;
+
+            // Make task draggable
+            makeDraggable(taskEl, index);
+
+            // Add event listeners
+            taskEl.querySelector('input[type="checkbox"]').addEventListener('change', () => toggleTaskComplete(index));
+            taskEl.querySelector('.select-task-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                setCurrentTask(index);
+            });
+            taskEl.querySelector('.delete-task-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteTask(index);
+            });
+
+            document.body.appendChild(taskEl);
+        });
+    }
+
+    function makeDraggable(element, index) {
+        let offsetX = 0, offsetY = 0, startX = 0, startY = 0;
+
+        element.style.position = 'absolute';
+        element.style.cursor = 'move';
+
+        // Set initial position from task data
+        element.style.left = `${tasks[index].x}px`;
+        element.style.top = `${tasks[index].y}px`;
+
+        element.onmousedown = dragMouseDown;
+
+        function dragMouseDown(e) {
+            e.preventDefault();
+            startX = e.clientX;
+            startY = e.clientY;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e.preventDefault();
+            offsetX = e.clientX - startX;
+            offsetY = e.clientY - startY;
+            startX = e.clientX;
+            startY = e.clientY;
+
+            // Calculate new position with constraints
+            const newLeft = Math.max(0, Math.min(window.innerWidth - element.offsetWidth, element.offsetLeft + offsetX));
+            const newTop = Math.max(80, Math.min(window.innerHeight - element.offsetHeight, element.offsetTop + offsetY));
+
+            element.style.left = newLeft + "px";
+            element.style.top = newTop + "px";
+
+            // Update task position in data
+            tasks[index].x = newLeft;
+            tasks[index].y = newTop;
+        }
+
+        function closeDragElement() {
+            // Save new position when dragging ends
+            saveTasks();
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+
+    function setCurrentTask(index) {
+        currentTaskIndex = index;
+        renderTasks();
+        saveTasks();
+    }
+
+    function toggleTaskComplete(index) {
+        tasks[index].completed = !tasks[index].completed;
+        if (tasks[index].completed && index === currentTaskIndex) {
+            currentTaskIndex = null;
+        }
+        renderTasks();
+        saveTasks();
+    }
+
+    function deleteTask(index) {
+        tasks.splice(index, 1);
+        if (currentTaskIndex === index) {
+            currentTaskIndex = null;
+        } else if (currentTaskIndex > index) {
+            currentTaskIndex--;
+        }
+        renderTasks();
+        saveTasks();
+    }
+
+    // Settings management
+    function saveSettings() {
+        localStorage.setItem('pomodoroSettings', JSON.stringify({
+            isMuted,
+            tickSoundEnabled,
+            currentMode,
+            sessionCount,
+            timeLeft
+        }));
+    }
+
+    function saveTasks() {
+        localStorage.setItem('pomodoroTasks', JSON.stringify({
+            tasks,
+            currentTaskIndex
+        }));
+    }
+
+    function loadSettings() {
+        const settings = JSON.parse(localStorage.getItem('pomodoroSettings'));
+        if (settings) {
+            isMuted = settings.isMuted || false;
+            tickSoundEnabled = settings.tickSoundEnabled !== false;
+            currentMode = settings.currentMode || 'pomodoro';
+            sessionCount = settings.sessionCount || 1;
+            timeLeft = settings.timeLeft || 25 * 60;
+
+            timerSound.muted = isMuted;
+
+            switchMode(currentMode, Math.floor(timeLeft / 60));
+            updateSessionCounter();
+        }
+    }
+
+    function loadTasks() {
+        const savedTasks = JSON.parse(localStorage.getItem('pomodoroTasks'));
+        if (savedTasks) {
+            tasks = savedTasks.tasks || [];
+            currentTaskIndex = savedTasks.currentTaskIndex !== null ? savedTasks.currentTaskIndex : null;
+            renderTasks();
+        }
+    }
+
+    // Event listeners
+    startBtn.addEventListener('click', startTimer);
+    pauseBtn.addEventListener('click', pauseTimer);
+    resetBtn.addEventListener('click', () => {
+        timer;
+        timeLeft = 25 * 60;
+        pauseTimer()
+        isRunning = false;
+        isMuted = false;
+        currentMode = 'pomodoro';
+        sessionCount = 1;
+        tasks = [];
+        currentTaskIndex = null;
+        tickSoundEnabled = true;
+        document.querySelectorAll('task-container').forEach(e => e.remove())
+        resetTimer(25)
+        renderTasks()
+        saveTasks()
+        saveSettings()
+    });
+
+    const backgroundMusic = document.getElementById('background-music');
+
+    // Set initial state
+    backgroundMusic.volume = 0.2; // Set default volume to 50%
+    backgroundMusic.pause(); // Start paused
+    var isFirstClick = true;
+
+    document.addEventListener('pointerdown', () => {
+        if (isFirstClick) {
+            // First click - play music and show volume high icon
+            backgroundMusic.play()
+                .then(() => {
+                    isFirstClick = false;
+                })
+                .catch(error => {
+                    console.error('Audio playback failed:', error);
+                    // Handle error (e.g., show message to user)
+                });
+        }
+    });
+
+    addTaskBtn.addEventListener('click', addTask);
+    taskInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addTask();
+    });
+
+    setCustomBtn.addEventListener('click', () => {
+        const minutes = parseInt(customMinutesInput.value) || 25;
+        if (minutes > 0 && minutes <= 120) {
+            resetTimer(minutes);
+        }
+    });
+
+    presetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const minutes = parseInt(btn.dataset.minutes);
+            const mode = btn.dataset.mode;
+            switchMode(mode, minutes);
+        });
+    });
+
+    // Prevent losing time on page refresh
+    window.addEventListener('beforeunload', () => {
+        saveSettings();
+        saveTasks();
+    });
+</script>
+</body>
+</html>
