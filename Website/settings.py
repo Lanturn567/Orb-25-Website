@@ -31,7 +31,8 @@ DEBUG = config("DJANGO_DEBUG", cast=bool, default=False)
 ALLOWED_HOSTS = [
     # "lanturn567.com",
     # "www.lanturn567.com",
-    ".railway.app"
+    ".railway.app",
+
 ]
 
 CSRF_TRUSTED_ORIGINS = [

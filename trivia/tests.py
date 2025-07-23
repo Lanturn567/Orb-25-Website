@@ -148,6 +148,7 @@ class FrontendIntegrationTests(StaticLiveServerTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         options = Options()
         options.add_argument('--headless')  # Needed in CI
         options.add_argument('--no-sandbox')
