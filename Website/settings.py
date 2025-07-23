@@ -9,9 +9,12 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+from decouple import config
+from django.core.management.utils import get_random_secret_key
 from pathlib import Path
 import os
+
+from pygments.lexer import default
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +24,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-4huj(b3!r6bc9lh-&4j=!c+^me1znu1jvlq#)ic%=k=zn4e#se'
-
+SECRET_KEY = config("DJANGO_SECRET_KEY", cast=str, default=get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DJANGO_DEBUG", cast=bool, default=False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    # "lanturn567.com",
+    # "www.lanturn567.com",
+    ".railway.app"
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.railway.app"
+]
+
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
