@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.webdriver import WebDriver
+from selenium.webdriver import Firefox
+from selenium.webdriver.firefox.options import Options
 import json
 import time
 
@@ -143,10 +145,15 @@ class BackendAPITests(TestCase):
         self.assertEqual(data['results'][0]['username'], 'user5')
 
 class FrontendIntegrationTests(StaticLiveServerTestCase):
+
     @classmethod
     def setUpClass(cls):
-        super().setUpClass()
-        cls.selenium = WebDriver()
+        options = Options()
+        options.add_argument('--headless')  # Needed in CI
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+
+        cls.selenium = Firefox(options=options)
         cls.selenium.implicitly_wait(10)
         cls.user = CustomUser.objects.create_user(
             username='testuser',

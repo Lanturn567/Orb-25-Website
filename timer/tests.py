@@ -9,10 +9,12 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.firefox.webdriver import WebDriver
+from selenium.webdriver import Firefox
+from selenium.webdriver.firefox.options import Options
 import time
 import requests
 import json
+
 
 class TimerViewsTests(TestCase):
     def setUp(self):
@@ -321,10 +323,15 @@ class StaticFilesTests(StaticLiveServerTestCase):
 
 
 class PomodoroTimerTests(StaticLiveServerTestCase):
+
     @classmethod
     def setUpClass(cls):
-        super().setUpClass()
-        cls.selenium = WebDriver()
+        options = Options()
+        options.add_argument('--headless')  # Needed in CI
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+
+        cls.selenium = Firefox(options=options)
         cls.selenium.implicitly_wait(10)
 
     @classmethod
