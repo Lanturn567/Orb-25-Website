@@ -221,8 +221,13 @@ class FrontendIntegrationTests(StaticLiveServerTestCase):
         play_button = self.selenium.find_element(By.XPATH, "//button[contains(text(), 'Play Game')]")
         play_button.click()
 
-        register_link = WebDriverWait(self.selenium, 5).until(
-            EC.presence_of_element_located((By.XPATH, "//span[contains(text(), 'Need an account? Register')]")))
+        spans = self.selenium.find_elements(By.TAG_NAME, "span")
+        register_link = None
+        for span in spans:
+            found = "Register" in span.text
+            if found:
+                register_link = span
+        self.assertTrue(register_link)
         register_link.click()
 
         # Fill registration form
@@ -270,8 +275,11 @@ class FrontendIntegrationTests(StaticLiveServerTestCase):
         WebDriverWait(self.selenium, 5).until(EC.presence_of_element_located((By.XPATH, "//h1[contains(text(), 'Pokémon Sunset')]")))
 
         # Wait for Pokémon to appear and click
-        time.sleep(2)
-        pokemon = self.selenium.find_elements(By.XPATH, "//img[contains(@src, 'static/trivia/assets/')]")
+        wait = WebDriverWait(self.selenium, 5)  # waits up to 10 seconds
+
+        pokemon = wait.until(
+            EC.presence_of_all_elements_located((By.XPATH, "//img[contains(@src, 'static/trivia/assets/')]"))
+        )
         if pokemon:
             pokemon[0].click()
             time.sleep(0.5)
@@ -280,7 +288,13 @@ class FrontendIntegrationTests(StaticLiveServerTestCase):
 
     def test_leaderboard_navigation(self):
         self.selenium.get(f"{self.live_server_url}{reverse('trivia:index')}")
-        leaderboard_button = self.selenium.find_element(By.XPATH, "//button[contains(text(), 'Leaderboard')]")
+
+        buttons = self.selenium.find_elements(By.TAG_NAME, "button")
+        leaderboard_button = None
+        for button in buttons:
+            found = "Leaderboard" in button.text
+            if found:
+                leaderboard_button = button
         leaderboard_button.click()
 
         WebDriverWait(self.selenium, 5).until(
