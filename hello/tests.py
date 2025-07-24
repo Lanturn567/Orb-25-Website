@@ -5,7 +5,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver import Chrome
 import os
 import requests
 
@@ -98,7 +98,8 @@ class IntegrationTests(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.selenium = WebDriver()
+        cls.selenium = Chrome()
+        cls.selenium.get('http://www.google.com/')
         cls.selenium.implicitly_wait(10)
 
     @classmethod
@@ -244,7 +245,8 @@ class MobileResponsivenessTests(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.selenium = WebDriver()
+        cls.selenium = Chrome()
+        cls.selenium.get('http://www.google.com/')
         cls.selenium.implicitly_wait(10)
         # Set mobile user agent and window size
         cls.selenium.set_window_size(375, 812)  # iPhone X dimensions

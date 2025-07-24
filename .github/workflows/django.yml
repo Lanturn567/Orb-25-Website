@@ -22,18 +22,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y firefox-esr
-
-      - name: Install geckodriver
-        run: |
-          GECKODRIVER_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep -oP '"tag_name": "\K[^"]+')
-          wget -q https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz
-          tar -xzf geckodriver-*.tar.gz
-          chmod +x geckodriver
-          sudo mv geckodriver /usr/local/bin/
+      - name: Install Chrome and ChromeDriver
+        uses: browser-actions/setup-chrome@latest
 
       - name: Set up environment
         run: |
@@ -44,5 +34,6 @@ jobs:
       - name: Run tests
         env:
           DJANGO_SETTINGS_MODULE: Website.settings
+          PATH: ${{ github.workspace }}/chromedriver:${{ env.PATH }}
         run: |
           python manage.py test

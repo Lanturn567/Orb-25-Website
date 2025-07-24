@@ -6,7 +6,7 @@ from trivia.models import CustomUser
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver import Chrome
 import json
 import time
 
@@ -146,7 +146,8 @@ class FrontendIntegrationTests(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.selenium = WebDriver()
+        cls.selenium = Chrome()
+        cls.selenium.get('http://www.google.com/')
         cls.selenium.implicitly_wait(10)
         cls.user = CustomUser.objects.create_user(
             username='testuser',

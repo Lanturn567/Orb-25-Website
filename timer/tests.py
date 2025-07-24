@@ -9,7 +9,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver import Chrome
 import time
 import requests
 import json
@@ -295,13 +295,6 @@ class TimerFunctionalityTests(TestCase):
         self.assertContains(response, 'id="set-custom-btn"')
 
 class StaticFilesTests(StaticLiveServerTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        # Skip these tests in CI environment if needed
-        import os
-        if os.getenv('CI'):
-            raise unittest.SkipTest("Skipping static files tests in CI")
 
     def test_static_files(self):
         urls = [
@@ -331,11 +324,9 @@ class PomodoroTimerTests(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        try:
-            cls.selenium = WebDriver()
-            cls.selenium.implicitly_wait(10)
-        except:
-            raise unittest.SkipTest("Selenium tests skipped - WebDriver not available")
+        cls.selenium = Chrome()
+        cls.selenium.get('http://www.google.com/')
+        cls.selenium.implicitly_wait(10)
 
     @classmethod
     def tearDownClass(cls):
