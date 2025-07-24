@@ -301,18 +301,7 @@ class StaticFilesTests(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        options = Options()
-        options.add_argument("--headless")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-
-        cls.temp_dir = tempfile.mkdtemp()
-        options.add_argument(f"--user-data-dir={cls.temp_dir}")
-
-        cls.selenium = Chrome(options=options)
-        cls.selenium.implicitly_wait(5)
-
-        cls.static_urls = [
+        cls.urls = [
             '/static/timer/assets/bg.gif',
             '/static/timer/assets/bgm.mp3',
             '/static/timer/assets/Buneary.png',
@@ -328,22 +317,16 @@ class StaticFilesTests(StaticLiveServerTestCase):
             '/static/timer/assets/Snorlax.png',
         ]
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.selenium.quit()
-        shutil.rmtree(cls.temp_dir, ignore_errors=True)
-        super().tearDownClass()
-
-    def test_static_files_load_in_browser(self):
-        for path in self.static_urls:
-            url = self.live_server_url + path
-            self.selenium.get(url)
-            # Wait until page title is set or screenshot is taken
-            self.assertIn("text/html", self.selenium.page_source or "fallback")
-            status_code = self.selenium.execute_script(
-                "return document.readyState"
-            )
-            self.assertEqual(status_code, "complete", f"Failed to load: {url}")
+    def test_static_files_accessible(self):
+        with requests.Session() as session:
+            for path in self.urls:
+                url = self.live_server_url + path
+                try:
+                    response = session.get(url, timeout=5)  # Add timeout
+                    self.assertEqual(response.status_code, 200, f"Failed to access: {url} (Status: {response.status_code})")
+                    self.assertGreater(len(response.content), 0, f"Empty content: {url}")
+                except requests.RequestException as e:
+                    self.fail(f"Request failed for {url}: {str(e)}")
 
 
 class PomodoroTimerTests(StaticLiveServerTestCase):
