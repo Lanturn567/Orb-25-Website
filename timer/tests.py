@@ -9,7 +9,9 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver import Chrome
+from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
+
 import time
 import requests
 import json
@@ -324,7 +326,9 @@ class PomodoroTimerTests(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.selenium = Chrome()
+        options = Options()
+        options.headless = True  # Run in headless mode for CI
+        cls.selenium = webdriver.Chrome(options=options)
         cls.selenium.get('http://www.google.com/')
         cls.selenium.implicitly_wait(10)
 
