@@ -29,14 +29,11 @@ SECRET_KEY = config("DJANGO_SECRET_KEY", cast=str, default=get_random_secret_key
 DEBUG = config("DJANGO_DEBUG", cast=bool, default=False)
 
 ALLOWED_HOSTS = [
-    # "lanturn567.com",
-    # "www.lanturn567.com",
-    ".railway.app",
-
+    "https://orb-25-website.onrender.com"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://*.railway.app"
+    "https://*.onrender.com"
 ]
 
 if DEBUG:
