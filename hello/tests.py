@@ -62,10 +62,6 @@ class TimerViewsTests(TestCase):
         self.assertContains(response, 'Pomodoro Timer')
 
 
-from django.test import TestCase
-import os
-from django.conf import settings
-
 class StaticFilesTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -110,123 +106,131 @@ class StaticFilesTests(TestCase):
                 except Exception as e:
                     self.fail(f"Request failed for {path}: {str(e)}")
 
-
 class IntegrationTests(StaticLiveServerTestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         options = Options()
+
+        # Configure headless mode with recommended flags
+        options.add_argument("--headless=new")  # New headless mode in Chrome 109+
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--window-size=1920,1080")
 
-        # Create unique user data directory
+        # Additional stability options
+        options.add_argument("--disable-extensions")
+        options.add_argument("--remote-debugging-port=9222")
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option("useAutomationExtension", False)
+
+        # Create isolated browser profile
         cls.temp_dir = tempfile.mkdtemp()
         options.add_argument(f"--user-data-dir={cls.temp_dir}")
 
         cls.selenium = Chrome(options=options)
-        cls.selenium.get('http://www.google.com/')
-        cls.selenium.implicitly_wait(10)
+        cls.wait = WebDriverWait(cls.selenium, 15)  # Shared wait instance with longer timeout
 
     @classmethod
     def tearDownClass(cls):
+        # Capture browser logs before quitting
+        logs = cls.selenium.get_log("browser")
+        if logs:
+            print("\nBrowser logs:")
+            for log in logs:
+                print(log)
+
         cls.selenium.quit()
-        shutil.rmtree(cls.temp_dir)  # Clean up temp directory
+        shutil.rmtree(cls.temp_dir, ignore_errors=True)
         super().tearDownClass()
 
-    def test_home_page(self):
+    def setUp(self):
         self.selenium.get(f"{self.live_server_url}{reverse('hello:index')}")
+        self.selenium.delete_all_cookies()  # Clean state for each test
 
+    def test_home_page(self):
+        """Test home page structure and navigation"""
         # Check page title
         self.assertIn('Pokemon DLKL', self.selenium.title)
 
         # Check main elements
-        header = self.selenium.find_element(By.CLASS_NAME, 'header-bg')
+        header = self.wait.until(
+            EC.visibility_of_element_located((By.CLASS_NAME, 'header-bg'))
+        )
         self.assertTrue(header.is_displayed())
 
         welcome = self.selenium.find_element(By.CLASS_NAME, 'welcome')
         self.assertEqual(welcome.text, 'WELCOME!')
 
-        # Button selectors
-        home_button = self.selenium.find_element(By.XPATH, "//button[contains(text(), 'HOME')]")
-        download_button = self.selenium.find_element(By.XPATH, "//button[contains(text(), 'DOWNLOAD')]")
-        news_button = self.selenium.find_element(By.XPATH, "//button[contains(text(), 'NEWS')]")
-        char_button = self.selenium.find_element(By.XPATH, "//button[contains(text(), 'CHARACTERS')]")
+        # Test navigation buttons
+        buttons = {
+            'HOME': 'welcome-container',
+            'DOWNLOAD': 'download-section',
+            'NEWS': 'news-section',
+            'CHARACTERS': 'characters-section'
+        }
 
-        self.assertTrue(home_button.is_displayed())
-        self.assertTrue(download_button.is_displayed())
-        self.assertTrue(news_button.is_displayed())
-        self.assertTrue(char_button.is_displayed())
+        for btn_text, section_class in buttons.items():
+            # Find and click button
+            button = self.wait.until(
+                EC.element_to_be_clickable((By.XPATH, f"//button[contains(text(), '{btn_text}')]"))
+            )
+            button.click()
 
-        wait = WebDriverWait(self.selenium, 5)
-
-        # HOME
-        home_button.click()
-        home_section = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'welcome-container')))
-        self.assertTrue(home_section.is_displayed())
-
-        # DOWNLOAD
-        download_button.click()
-        download_section = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'download-section')))
-        self.assertTrue(download_section.is_displayed())
-
-        # NEWS
-        news_button.click()
-        news_section = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'news-section')))
-        self.assertTrue(news_section.is_displayed())
-
-        # CHARACTERS
-        char_button.click()
-        char_section = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'characters-section')))
-        self.assertTrue(char_section.is_displayed())
-
+            # Verify corresponding section is displayed
+            section = self.wait.until(
+                EC.visibility_of_element_located((By.CLASS_NAME, section_class))
+            )
+            self.assertTrue(section.is_displayed())
 
     def test_clicker_game_link(self):
-        self.selenium.get(f"{self.live_server_url}{reverse('hello:index')}")
-        clicker_box = self.selenium.find_element(By.XPATH, "//div[contains(@class, 'interactive-box') and .//div[contains(text(), 'Clicker Game')]]")
+        """Test clicker game link navigation"""
+        clicker_box = self.wait.until(
+            EC.element_to_be_clickable((By.XPATH,
+                                        "//div[contains(@class, 'interactive-box') and .//div[contains(text(), 'Clicker Game')]]"))
+        )
         clicker_box.click()
 
-        # Should be redirected to clicker game page
-        self.assertIn('trivia', self.selenium.current_url)
+        # Verify navigation
+        self.wait.until(EC.url_contains('trivia'))
         self.assertIn('Clicker Game', self.selenium.page_source)
 
     def test_pomodoro_timer_link(self):
-        self.selenium.get(f"{self.live_server_url}{reverse('hello:index')}")
-        timer_box = self.selenium.find_element(By.XPATH, "//div[contains(@class, 'interactive-box') and .//div[contains(text(), 'Pomodoro Timer')]]")
+        """Test pomodoro timer link navigation"""
+        timer_box = self.wait.until(
+            EC.element_to_be_clickable((By.XPATH,
+                                        "//div[contains(@class, 'interactive-box') and .//div[contains(text(), 'Pomodoro Timer')]]"))
+        )
         timer_box.click()
 
-        # Should be redirected to timer page
-        self.assertIn('timer', self.selenium.current_url)
+        # Verify navigation
+        self.wait.until(EC.url_contains('timer'))
         self.assertIn('Pomodoro Timer', self.selenium.page_source)
 
     def test_social_share_menu(self):
-        self.selenium.get(f"{self.live_server_url}{reverse('hello:index')}")
-        wait = WebDriverWait(self.selenium, 10)
-
+        """Test social share menu functionality"""
         # Share menu should start hidden
         share_menu = self.selenium.find_element(By.ID, 'share-menu')
         self.assertFalse(share_menu.is_displayed())
 
         # Click share button should show menu
-        share_button = self.selenium.find_element(By.ID, 'share-button')
+        share_button = self.wait.until(
+            EC.element_to_be_clickable((By.ID, 'share-button'))
+        )
         share_button.click()
-        wait.until(EC.visibility_of(share_menu))
 
-        # Menu should now be visible
+        # Wait for menu animation
+        self.wait.until(EC.visibility_of(share_menu))
         self.assertTrue(share_menu.is_displayed())
 
-        # Check social links
-        twitter_link = self.selenium.find_element(By.XPATH, "//a[contains(@href, 'x.com')]")
-        self.assertTrue(twitter_link.is_displayed())
-
-        discord_link = self.selenium.find_element(By.XPATH, "//a[contains(@href, 'discord.gg')]")
-        self.assertTrue(discord_link.is_displayed())
-
-        instagram_link = self.selenium.find_element(By.XPATH, "//a[contains(@href, 'instagram.com')]")
-        self.assertTrue(instagram_link.is_displayed())
-
-        tiktok_link = self.selenium.find_element(By.XPATH, "//a[contains(@href, 'tiktok.com')]")
-        self.assertTrue(tiktok_link.is_displayed())
+        # Verify social links
+        social_platforms = ['x.com', 'discord.gg', 'instagram.com', 'tiktok.com']
+        for platform in social_platforms:
+            link = self.wait.until(
+                EC.visibility_of_element_located((By.XPATH, f"//a[contains(@href, '{platform}')]"))
+            )
+            self.assertTrue(link.is_displayed())
 
 
 class DownloadTests(TestCase):

@@ -351,32 +351,58 @@ class PomodoroTimerTests(StaticLiveServerTestCase):
     def setUpClass(cls):
         super().setUpClass()
         options = Options()
+
+        # Configure headless mode with recommended flags
+        options.add_argument("--headless=new")  # New headless mode in Chrome 109+
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--window-size=1920,1080")
 
-        # Create unique user data directory
+        # Disable extensions and enable automation flag
+        options.add_argument("--disable-extensions")
+        options.add_argument("--remote-debugging-port=9222")
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option("useAutomationExtension", False)
+
+        # Create isolated browser profile
         cls.temp_dir = tempfile.mkdtemp()
         options.add_argument(f"--user-data-dir={cls.temp_dir}")
 
+        # Configure browser behavior
+        options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
+
         cls.selenium = Chrome(options=options)
         cls.selenium.implicitly_wait(10)
+        cls.wait = WebDriverWait(cls.selenium, 15)  # Shared wait instance
 
     @classmethod
     def tearDownClass(cls):
+        # Capture browser logs before quitting
+        logs = cls.selenium.get_log("browser")
+        if logs:
+            print("\nBrowser logs:")
+            for log in logs:
+                print(log)
+
         cls.selenium.quit()
-        shutil.rmtree(cls.temp_dir)  # Clean up temp directory
+        shutil.rmtree(cls.temp_dir, ignore_errors=True)
         super().tearDownClass()
 
-    def test_page_elements(self):
+    def setUp(self):
         self.selenium.get(f"{self.live_server_url}{reverse('timer:index')}")
-        wait = WebDriverWait(self.selenium, 10)
+        self.selenium.delete_all_cookies()  # Clean state for each test
 
+    def test_page_elements(self):
+        """Test initial page structure and elements"""
         # Check page title
         self.assertIn('Pokemon DLKL Pomodoro Timer', self.selenium.title)
 
         # Check header elements
-        header_images = self.selenium.find_elements(By.CLASS_NAME, 'header-image')
-        self.assertGreaterEqual(len(header_images), 1)  # At least one image
+        header_images = self.wait.until(
+            EC.presence_of_all_elements_located((By.CLASS_NAME, 'header-image'))
+        )
+        self.assertGreaterEqual(len(header_images), 1)
 
         # Check timer controls
         timer_mode = self.selenium.find_element(By.ID, 'timer-mode')
@@ -386,32 +412,41 @@ class PomodoroTimerTests(StaticLiveServerTestCase):
         self.assertEqual(clock.text, '25:00')
 
     def test_timer_functionality(self):
-        self.selenium.get(f"{self.live_server_url}{reverse('timer:index')}")
-
-        # Start the timer
-        start_btn = self.selenium.find_element(By.ID, 'start-btn')
+        """Test timer start/pause functionality"""
+        start_btn = self.wait.until(
+            EC.element_to_be_clickable((By.ID, 'start-btn'))
+        )
         start_btn.click()
 
-        # Check that pause button is enabled
-        pause_btn = self.selenium.find_element(By.ID, 'pause-btn')
-        self.assertFalse(pause_btn.get_attribute('disabled'))
+        # Verify timer started
+        enabled = self.wait.until(
+            lambda driver: driver.find_element(By.ID, 'pause-btn').is_enabled()
+        )
+        self.assertTrue(enabled)
+
+        # Verify timer is counting down
+        clock = self.selenium.find_element(By.ID, 'clock')
+        self.wait.until(
+            lambda driver: clock.text != '25:00'
+        )
 
     def test_spotify_integration(self):
-        self.selenium.get(f"{self.live_server_url}{reverse('timer:index')}")
-        wait = WebDriverWait(self.selenium, 10)
-
-        spotify_button = wait.until(EC.element_to_be_clickable((By.ID, "spotify-button")))
+        """Test Spotify modal interaction"""
+        spotify_button = self.wait.until(
+            EC.element_to_be_clickable((By.ID, "spotify-button")))
         spotify_button.click()
 
-        # Check modal content
-        modal = self.selenium.find_element(By.ID, 'spotify-modal')
-        wait.until(EC.visibility_of(modal))
+        # Verify modal appears
+        modal = self.wait.until(
+            EC.visibility_of_element_located((By.ID, 'spotify-modal'))
+        )
         self.assertTrue(modal.is_displayed())
 
         # Close modal
         close_btn = modal.find_element(By.CLASS_NAME, 'close')
         close_btn.click()
 
-        # Check modal is hidden
-        wait.until(EC.invisibility_of_element(modal))
-        self.assertFalse(modal.is_displayed())
+        # Verify modal disappears
+        self.wait.until(
+            EC.invisibility_of_element_located((By.ID, 'spotify-modal'))
+        )
