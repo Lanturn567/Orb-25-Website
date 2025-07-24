@@ -124,7 +124,7 @@ class IntegrationTests(StaticLiveServerTestCase):
         cls.temp_dir = tempfile.mkdtemp()
         options.add_argument(f"--user-data-dir={cls.temp_dir}")
 
-        cls.selenium = Chrome()
+        cls.selenium = Chrome(options=options)
         cls.selenium.get('http://www.google.com/')
         cls.selenium.implicitly_wait(10)
 
