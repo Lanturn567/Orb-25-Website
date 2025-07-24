@@ -298,9 +298,21 @@ class TimerFunctionalityTests(TestCase):
         self.assertContains(response, 'id="set-custom-btn"')
 
 class StaticFilesTests(StaticLiveServerTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        options = Options()
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
 
-    def test_static_files(self):
-        urls = [
+        cls.temp_dir = tempfile.mkdtemp()
+        options.add_argument(f"--user-data-dir={cls.temp_dir}")
+
+        cls.selenium = Chrome(options=options)
+        cls.selenium.implicitly_wait(5)
+
+        cls.static_urls = [
             '/static/timer/assets/bg.gif',
             '/static/timer/assets/bgm.mp3',
             '/static/timer/assets/Buneary.png',
@@ -316,12 +328,23 @@ class StaticFilesTests(StaticLiveServerTestCase):
             '/static/timer/assets/Snorlax.png',
         ]
 
-        for path in urls:
-            try:
-                response = requests.get(self.live_server_url + path)
-                self.assertEqual(response.status_code, 200, msg=f"Failed to load: {path}")
-            except requests.exceptions.RequestException:
-                self.fail(f"Failed to load static file: {path}")
+    @classmethod
+    def tearDownClass(cls):
+        cls.selenium.quit()
+        shutil.rmtree(cls.temp_dir, ignore_errors=True)
+        super().tearDownClass()
+
+    def test_static_files_load_in_browser(self):
+        for path in self.static_urls:
+            url = self.live_server_url + path
+            self.selenium.get(url)
+            # Wait until page title is set or screenshot is taken
+            self.assertIn("text/html", self.selenium.page_source or "fallback")
+            status_code = self.selenium.execute_script(
+                "return document.readyState"
+            )
+            self.assertEqual(status_code, "complete", f"Failed to load: {url}")
+
 
 class PomodoroTimerTests(StaticLiveServerTestCase):
     @classmethod

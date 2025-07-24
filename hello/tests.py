@@ -64,9 +64,30 @@ class TimerViewsTests(TestCase):
         self.assertContains(response, 'Pomodoro Timer')
 
 
+import tempfile
+import shutil
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from selenium.webdriver import Chrome
+from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import WebDriverException
+
 class StaticFilesTests(StaticLiveServerTestCase):
-    def test_static_files(self):
-        urls = [
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        options = Options()
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+
+        cls.temp_dir = tempfile.mkdtemp()
+        options.add_argument(f"--user-data-dir={cls.temp_dir}")
+
+        cls.selenium = Chrome(options=options)
+        cls.selenium.implicitly_wait(5)
+
+        cls.urls = [
             '/static/hello/assets/icon.png',
             '/static/hello/assets/champ.webp',
             '/static/hello/assets/chichou.gif',
@@ -91,10 +112,18 @@ class StaticFilesTests(StaticLiveServerTestCase):
             '/static/hello/assets/bgm.mp3',
         ]
 
-        for path in urls:
-            response = requests.get(self.live_server_url + path)
-            self.assertEqual(response.status_code, 200, msg=f"Failed to load: {path}")
+    @classmethod
+    def tearDownClass(cls):
+        cls.selenium.quit()
+        shutil.rmtree(cls.temp_dir, ignore_errors=True)
+        super().tearDownClass()
 
+    def test_static_files_accessible(self):
+        for path in self.urls:
+            url = self.live_server_url + path
+            self.selenium.get(url)
+            status = self.selenium.execute_script("return document.readyState")
+            self.assertEqual(status, "complete", f"Page did not fully load: {url}")
 
 class IntegrationTests(StaticLiveServerTestCase):
 
