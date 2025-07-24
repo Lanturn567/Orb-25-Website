@@ -28,9 +28,7 @@ SECRET_KEY = config("DJANGO_SECRET_KEY", cast=str, default=get_random_secret_key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DJANGO_DEBUG", cast=bool, default=False)
 
-ALLOWED_HOSTS = [
-   ".onrender.com"
-]
+ALLOWED_HOSTS = ['orb-25-website.onrender.com']
 
 CSRF_TRUSTED_ORIGINS = [
     "https://*.onrender.com"
