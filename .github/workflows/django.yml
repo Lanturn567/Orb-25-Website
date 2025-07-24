@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
+      max-parallel: 1
       matrix:
         python-version: ["3.13"]
 
@@ -31,4 +31,4 @@ jobs:
         env:
           DJANGO_SETTINGS_MODULE: Website.settings
         run: |
-          python manage.py test
+          python3 manage.py test
