@@ -297,7 +297,8 @@ class TimerFunctionalityTests(TestCase):
         self.assertContains(response, 'id="custom-minutes"')
         self.assertContains(response, 'id="set-custom-btn"')
 
-class StaticFilesTests(StaticLiveServerTestCase):
+
+class StaticFilesTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -318,15 +319,31 @@ class StaticFilesTests(StaticLiveServerTestCase):
         ]
 
     def test_static_files_accessible(self):
-        with requests.Session() as session:
-            for path in self.urls:
-                url = self.live_server_url + path
-                try:
-                    response = session.get(url, timeout=5)  # Add timeout
-                    self.assertEqual(response.status_code, 200, f"Failed to access: {url} (Status: {response.status_code})")
-                    self.assertGreater(len(response.content), 0, f"Empty content: {url}")
-                except requests.RequestException as e:
-                    self.fail(f"Request failed for {url}: {str(e)}")
+        for path in self.urls:
+            try:
+                response = self.client.get(path)
+                self.assertEqual(response.status_code, 200,
+                                 f"Failed to access: {path} (Status: {response.status_code})")
+
+                # Check for streaming content
+                if hasattr(response, 'streaming_content'):
+                    content = b''.join(response.streaming_content)
+                else:
+                    content = response.content
+
+                self.assertGreater(len(content), 0,
+                                   f"Empty content: {path}")
+
+                # Content-Type checks
+                if path.endswith('.png'):
+                    self.assertIn('image/png', response['Content-Type'])
+                elif path.endswith('.gif'):
+                    self.assertIn('image/gif', response['Content-Type'])
+                elif path.endswith('.mp3'):
+                    self.assertIn('audio/mpeg', response['Content-Type'])
+
+            except Exception as e:
+                self.fail(f"Request failed for {path}: {str(e)}")
 
 
 class PomodoroTimerTests(StaticLiveServerTestCase):
