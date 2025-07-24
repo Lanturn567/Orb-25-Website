@@ -6,8 +6,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver import Chrome
+import os
 from selenium.webdriver.chrome.options import Options
-from selenium import webdriver
+import tempfile
+import shutil
 import requests
 
 class HelloViewsTests(TestCase):
@@ -96,18 +98,26 @@ class StaticFilesTests(StaticLiveServerTestCase):
 
 
 class IntegrationTests(StaticLiveServerTestCase):
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         options = Options()
-        options.headless = True  # Run in headless mode for CI
-        cls.selenium = webdriver.Chrome(options=options)
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+
+        # Create unique user data directory
+        cls.temp_dir = tempfile.mkdtemp()
+        options.add_argument(f"--user-data-dir={cls.temp_dir}")
+
+        cls.selenium = Chrome()
         cls.selenium.get('http://www.google.com/')
         cls.selenium.implicitly_wait(10)
 
     @classmethod
     def tearDownClass(cls):
         cls.selenium.quit()
+        shutil.rmtree(cls.temp_dir)  # Clean up temp directory
         super().tearDownClass()
 
     def test_home_page(self):
@@ -250,14 +260,21 @@ class MobileResponsivenessTests(StaticLiveServerTestCase):
         super().setUpClass()
         options = Options()
         options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=375,812")  # iPhone X dimensions
+
+        # Create unique user data directory
+        cls.temp_dir = tempfile.mkdtemp()
+        options.add_argument(f"--user-data-dir={cls.temp_dir}")
+
         cls.selenium = Chrome(options=options)
-        cls.selenium.get('http://www.google.com/')
         cls.selenium.implicitly_wait(10)
 
     @classmethod
     def tearDownClass(cls):
         cls.selenium.quit()
+        shutil.rmtree(cls.temp_dir)  # Clean up temp directory
         super().tearDownClass()
 
     def test_mobile_menu(self):

@@ -16,24 +16,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Install Chrome and ChromeDriver
+      - name: Install Chrome
         uses: browser-actions/setup-chrome@latest
-
-      - name: Set up environment
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-selenium pytest-django
-
       - name: Run tests
         env:
           DJANGO_SETTINGS_MODULE: Website.settings
-          PATH: ${{ github.workspace }}/chromedriver:${{ env.PATH }}
         run: |
           python manage.py test

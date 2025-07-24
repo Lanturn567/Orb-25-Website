@@ -6,8 +6,10 @@ from trivia.models import CustomUser
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
-from selenium import webdriver
+import tempfile
+import shutil
 import json
 import time
 
@@ -148,9 +150,15 @@ class FrontendIntegrationTests(StaticLiveServerTestCase):
     def setUpClass(cls):
         super().setUpClass()
         options = Options()
-        options.headless = True  # Run in headless mode for CI
-        cls.selenium = webdriver.Chrome(options=options)
-        cls.selenium.get('http://www.google.com/')
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+
+        # Create unique user data directory
+        cls.temp_dir = tempfile.mkdtemp()
+        options.add_argument(f"--user-data-dir={cls.temp_dir}")
+
+        cls.selenium = Chrome(options=options)
         cls.selenium.implicitly_wait(10)
         cls.user = CustomUser.objects.create_user(
             username='testuser',
@@ -161,6 +169,7 @@ class FrontendIntegrationTests(StaticLiveServerTestCase):
     @classmethod
     def tearDownClass(cls):
         cls.selenium.quit()
+        shutil.rmtree(cls.temp_dir)  # Clean up temp directory
         super().tearDownClass()
 
     def test_home_page_elements(self):

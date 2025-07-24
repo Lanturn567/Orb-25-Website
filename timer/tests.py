@@ -9,9 +9,10 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
-from selenium import webdriver
-
+import tempfile
+import shutil
 import time
 import requests
 import json
@@ -327,25 +328,25 @@ class PomodoroTimerTests(StaticLiveServerTestCase):
     def setUpClass(cls):
         super().setUpClass()
         options = Options()
-        options.headless = True  # Run in headless mode for CI
-        cls.selenium = webdriver.Chrome(options=options)
-        cls.selenium.get('http://www.google.com/')
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+
+        # Create unique user data directory
+        cls.temp_dir = tempfile.mkdtemp()
+        options.add_argument(f"--user-data-dir={cls.temp_dir}")
+
+        cls.selenium = Chrome(options=options)
         cls.selenium.implicitly_wait(10)
 
     @classmethod
     def tearDownClass(cls):
-        if hasattr(cls, 'selenium'):
-            cls.selenium.quit()
+        cls.selenium.quit()
+        shutil.rmtree(cls.temp_dir)  # Clean up temp directory
         super().tearDownClass()
-
-    def setUp(self):
-        # Skip if in CI environment
-        import os
-        if os.getenv('CI'):
-            self.skipTest("Skipping Selenium tests in CI")
 
     def test_page_elements(self):
         self.selenium.get(f"{self.live_server_url}{reverse('timer:index')}")
+        wait = WebDriverWait(self.selenium, 10)
 
         # Check page title
         self.assertIn('Pokemon DLKL Pomodoro Timer', self.selenium.title)
@@ -376,9 +377,8 @@ class PomodoroTimerTests(StaticLiveServerTestCase):
         self.selenium.get(f"{self.live_server_url}{reverse('timer:index')}")
         wait = WebDriverWait(self.selenium, 10)
 
-        # Open Spotify modal
-        spotify_btn = self.selenium.find_element(By.ID, 'spotify-button')
-        spotify_btn.click()
+        spotify_button = wait.until(EC.element_to_be_clickable((By.ID, "spotify-button")))
+        spotify_button.click()
 
         # Check modal content
         modal = self.selenium.find_element(By.ID, 'spotify-modal')
