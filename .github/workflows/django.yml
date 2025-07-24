@@ -27,6 +27,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-selenium pytest-django
+      - name: Set environment variables
+        run: |
+            echo "DJANGO_SECRET_KEY=temporarysecretkey" >> $GITHUB_ENV
+            echo "DJANGO_DEBUG=True" >> $GITHUB_ENV
+      - name: Collect static files
+        run: |
+          python3 manage.py collectstatic --noinput
       - name: Run tests
         env:
           DJANGO_SETTINGS_MODULE: Website.settings

@@ -29,7 +29,7 @@ SECRET_KEY = config("DJANGO_SECRET_KEY", cast=str, default=get_random_secret_key
 DEBUG = config("DJANGO_DEBUG", cast=bool, default=False)
 
 ALLOWED_HOSTS = [
-    "https://orb-25-website.onrender.com"
+   ".onrender.com"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -146,6 +146,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'timer/static'),
     os.path.join(BASE_DIR, 'trivia/static'),
 ]
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # For production
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
