@@ -334,6 +334,32 @@ function Header({ user, onUserUpdate, onNavigate }) {
     const audioRef = React.useRef(null);
     const [isMobile, setIsMobile] = React.useState(false);
 
+    const isFirstClick = React.useRef(true);
+
+    React.useEffect(() => {
+        const handleFirstClick = () => {
+            const audio = audioRef.current;
+            if (isFirstClick.current) {
+                isFirstClick.current = false;
+
+                audio.play()
+                    .then(() => {
+                        setIsMuted(false);
+                    })
+                    .catch(error => {
+                        console.error('Audio playback failed:', error);
+                    });
+            }
+        };
+
+        document.addEventListener('pointerdown', handleFirstClick);
+
+        return () => {
+            document.removeEventListener('pointerdown', handleFirstClick);
+        };
+    }, []);
+
+
     // Memoize the onUserUpdate function if it's passed from parent
     const stableOnUserUpdate = React.useCallback(onUserUpdate, []);
 
@@ -345,23 +371,6 @@ function Header({ user, onUserUpdate, onNavigate }) {
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
-
-    React.useEffect(() => {
-        const audio = audioRef.current;
-        audio.volume = 0.2;
-        audio.pause();
-
-        const handleFirstPlay = () => {
-            if (isMuted) {
-                audio.play()
-                    .then(() => setIsMuted(false))
-                    .catch(console.error);
-            }
-        };
-
-        document.addEventListener('pointerdown', handleFirstPlay);
-        return () => document.removeEventListener('pointerdown', handleFirstPlay);
-    }, [isMuted]);
 
     React.useEffect(() => {
         const checkAuthStatus = async () => {
@@ -1240,6 +1249,7 @@ function LoginScreen({ onLogin, onSwitchToRegister, onClose }) {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Button
+                            name="login"
                             text={isLoading ? "Logging in..." : "Login"}
                             color="#55efc4"
                             type="submit"

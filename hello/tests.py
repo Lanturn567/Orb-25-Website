@@ -5,9 +5,8 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.firefox.webdriver import WebDriver
-from selenium.webdriver import Firefox
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.webdriver import WebDriver
+import os
 import requests
 
 class HelloViewsTests(TestCase):
@@ -21,7 +20,7 @@ class HelloViewsTests(TestCase):
         self.assertContains(response, 'Pokemon DLKL')
         self.assertContains(response, 'WELCOME!')
 
-    '''
+'''
     def test_download_view(self):
         # Test Windows download
         response = self.client.get(reverse('hello:download', args=['windows']))
@@ -38,7 +37,8 @@ class HelloViewsTests(TestCase):
         # Test invalid platform
         response = self.client.get(reverse('hello:download', args=['invalid']))
         self.assertEqual(response.status_code, 404)
-    '''
+'''
+
 
 class TriviaViewsTests(TestCase):
     def setUp(self):
@@ -98,12 +98,7 @@ class IntegrationTests(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        options = Options()
-        options.add_argument('--headless')  # Needed in CI
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
-
-        cls.selenium = Firefox(options=options)
+        cls.selenium = WebDriver()
         cls.selenium.implicitly_wait(10)
 
     @classmethod
@@ -178,6 +173,7 @@ class IntegrationTests(StaticLiveServerTestCase):
 
     def test_social_share_menu(self):
         self.selenium.get(f"{self.live_server_url}{reverse('hello:index')}")
+        wait = WebDriverWait(self.selenium, 10)
 
         # Share menu should start hidden
         share_menu = self.selenium.find_element(By.ID, 'share-menu')
@@ -186,6 +182,7 @@ class IntegrationTests(StaticLiveServerTestCase):
         # Click share button should show menu
         share_button = self.selenium.find_element(By.ID, 'share-button')
         share_button.click()
+        wait.until(EC.visibility_of(share_menu))
 
         # Menu should now be visible
         self.assertTrue(share_menu.is_displayed())
@@ -205,7 +202,6 @@ class IntegrationTests(StaticLiveServerTestCase):
 
 
 class DownloadTests(TestCase):
-
     def test_download_links(self):
         response = self.client.get(reverse('hello:index'))
 
@@ -260,6 +256,7 @@ class MobileResponsivenessTests(StaticLiveServerTestCase):
 
     def test_mobile_menu(self):
         self.selenium.get(f"{self.live_server_url}{reverse('hello:index')}")
+        wait = WebDriverWait(self.selenium, 10)
 
         # Mobile menu toggle should be visible
         menu_toggle = self.selenium.find_element(By.CLASS_NAME, 'mobile-menu-toggle')
@@ -271,6 +268,7 @@ class MobileResponsivenessTests(StaticLiveServerTestCase):
 
         # Click toggle should show menu
         menu_toggle.click()
+        wait.until(EC.visibility_of(main_menu))
         self.assertTrue(main_menu.is_displayed())
 
         # Menu items should be accessible
@@ -279,4 +277,5 @@ class MobileResponsivenessTests(StaticLiveServerTestCase):
 
         # Click toggle again should hide menu
         menu_toggle.click()
+        wait.until(EC.invisibility_of_element(main_menu))
         self.assertFalse(main_menu.is_displayed())

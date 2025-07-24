@@ -334,6 +334,32 @@ function Header({ user, onUserUpdate, onNavigate }) {
     const audioRef = React.useRef(null);
     const [isMobile, setIsMobile] = React.useState(false);
 
+    const isFirstClick = React.useRef(true);
+
+    React.useEffect(() => {
+        const handleFirstClick = () => {
+            const audio = audioRef.current;
+            if (isFirstClick.current) {
+                isFirstClick.current = false;
+
+                audio.play()
+                    .then(() => {
+                        setIsMuted(false);
+                    })
+                    .catch(error => {
+                        console.error('Audio playback failed:', error);
+                    });
+            }
+        };
+
+        document.addEventListener('pointerdown', handleFirstClick);
+
+        return () => {
+            document.removeEventListener('pointerdown', handleFirstClick);
+        };
+    }, []);
+
+
     // Memoize the onUserUpdate function if it's passed from parent
     const stableOnUserUpdate = React.useCallback(onUserUpdate, []);
 
@@ -345,23 +371,6 @@ function Header({ user, onUserUpdate, onNavigate }) {
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
-
-    React.useEffect(() => {
-        const audio = audioRef.current;
-        audio.volume = 0.2;
-        audio.pause();
-
-        const handleFirstPlay = () => {
-            if (isMuted) {
-                audio.play()
-                    .then(() => setIsMuted(false))
-                    .catch(console.error);
-            }
-        };
-
-        document.addEventListener('pointerdown', handleFirstPlay);
-        return () => document.removeEventListener('pointerdown', handleFirstPlay);
-    }, [isMuted]);
 
     React.useEffect(() => {
         const checkAuthStatus = async () => {
@@ -1202,6 +1211,7 @@ function LoginScreen({ onLogin, onSwitchToRegister, onClose }) {
                         <label style={{ display: 'block', marginBottom: '5px', fontFamily: "'Dancing Script', cursive" }}>Username:</label>
                         <input
                             type="text"
+                            id="username"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             style={{
@@ -1220,6 +1230,7 @@ function LoginScreen({ onLogin, onSwitchToRegister, onClose }) {
                     <div style={{ marginBottom: '20px' }}>
                         <label style={{ display: 'block', marginBottom: '5px', fontFamily: "'Dancing Script', cursive" }}>Password:</label>
                         <input
+                            id="password"
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -1238,6 +1249,7 @@ function LoginScreen({ onLogin, onSwitchToRegister, onClose }) {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Button
+                            id="login"
                             text={isLoading ? "Logging in..." : "Login"}
                             color="#55efc4"
                             type="submit"
@@ -1361,6 +1373,7 @@ function RegisterScreen({ onRegister, onSwitchToLogin, onClose }) {
                     <div style={{ marginBottom: '15px' }}>
                         <label style={{ display: 'block', marginBottom: '5px', fontFamily: "'Dancing Script', cursive" }}>Email:</label>
                         <input
+                            id="emailRegister"
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -1379,6 +1392,7 @@ function RegisterScreen({ onRegister, onSwitchToLogin, onClose }) {
                     <div style={{ marginBottom: '15px' }}>
                         <label style={{ display: 'block', marginBottom: '5px', fontFamily: "'Dancing Script', cursive" }}>Username:</label>
                         <input
+                            id="usernameRegister"
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
@@ -1398,6 +1412,7 @@ function RegisterScreen({ onRegister, onSwitchToLogin, onClose }) {
                     <div style={{ marginBottom: '15px' }}>
                         <label style={{ display: 'block', marginBottom: '5px', fontFamily: "'Dancing Script', cursive" }}>Password (min 8 chars):</label>
                         <input
+                            id="passwordRegister"
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -1417,6 +1432,7 @@ function RegisterScreen({ onRegister, onSwitchToLogin, onClose }) {
                     <div style={{ marginBottom: '20px' }}>
                         <label style={{ display: 'block', marginBottom: '5px', fontFamily: "'Dancing Script', cursive" }}>Confirm Password:</label>
                         <input
+                            id="confirmPasswordRegister"
                             type="password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}

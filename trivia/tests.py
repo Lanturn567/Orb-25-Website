@@ -6,9 +6,7 @@ from trivia.models import CustomUser
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.firefox.webdriver import WebDriver
-from selenium.webdriver import Firefox
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.webdriver import WebDriver
 import json
 import time
 
@@ -145,16 +143,10 @@ class BackendAPITests(TestCase):
         self.assertEqual(data['results'][0]['username'], 'user5')
 
 class FrontendIntegrationTests(StaticLiveServerTestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        options = Options()
-        options.add_argument('--headless')  # Needed in CI
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
-
-        cls.selenium = Firefox(options=options)
+        cls.selenium = WebDriver()
         cls.selenium.implicitly_wait(10)
         cls.user = CustomUser.objects.create_user(
             username='testuser',
@@ -207,6 +199,7 @@ class FrontendIntegrationTests(StaticLiveServerTestCase):
         self.selenium.get(f"{self.live_server_url}{reverse('trivia:index')}")
         play_button = self.selenium.find_element(By.XPATH, "//button[contains(text(), 'Play Game')]")
         play_button.click()
+        WebDriverWait(self.selenium, 5)
 
         username = self.selenium.find_element(By.ID, 'username')
         password = self.selenium.find_element(By.ID, 'password')
@@ -214,12 +207,18 @@ class FrontendIntegrationTests(StaticLiveServerTestCase):
         username.send_keys('testuser')
         password.send_keys('testpass123')
 
-        login_button = self.selenium.find_element(By.XPATH, "//button[contains(text(), 'Login')]")
+        buttons = self.selenium.find_elements(By.TAG_NAME, "button")
+        login_button = None
+        for button in buttons:
+            found = "Login" in button.text
+            if found:
+                login_button = button
+
+        self.assertTrue(login_button)
         login_button.click()
 
         # Verify game screen
-        WebDriverWait(self.selenium, 5).until(
-            EC.presence_of_element_located((By.XPATH, "//h1[contains(text(), 'Pokémon Sunset')]")))
+        WebDriverWait(self.selenium, 5).until(EC.presence_of_element_located((By.XPATH, "//h1[contains(text(), 'Pokémon Sunset')]")))
 
         # Wait for Pokémon to appear and click
         time.sleep(2)
