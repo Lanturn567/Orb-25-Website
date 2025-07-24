@@ -275,13 +275,14 @@ class FrontendIntegrationTests(StaticLiveServerTestCase):
         WebDriverWait(self.selenium, 5).until(EC.presence_of_element_located((By.XPATH, "//h1[contains(text(), 'Pokémon Sunset')]")))
 
         # Wait for Pokémon to appear and click
-        wait = WebDriverWait(self.selenium, 5)  # waits up to 10 seconds
+        wait = WebDriverWait(self.selenium, 10)
 
         pokemon = wait.until(
-            EC.presence_of_all_elements_located((By.XPATH, "//img[contains(@src, 'static/trivia/assets/')]"))
+            EC.element_to_be_clickable((By.XPATH, "//img[contains(@src, 'static/trivia/assets/')]"))
         )
+
         if pokemon:
-            pokemon[0].click()
+            pokemon.click()
             time.sleep(0.5)
             score = self.selenium.find_element(By.XPATH, "//h1[contains(text(), 'Score:')]").text
             self.assertNotEqual(score, "Score: 0")
