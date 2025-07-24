@@ -13,45 +13,81 @@ import shutil
 import json
 import time
 
-class StaticFilesTests(StaticLiveServerTestCase):
-    def test_static_files(self):
-        urls = [
-            '/static/trivia/assets/Altaria.png',
-            '/static/trivia/assets/Blitzle.png',
-            '/static/trivia/assets/Buneary.png',
-            '/static/trivia/assets/Chandelure.png',
-            '/static/trivia/assets/Chinchou.png',
-            '/static/trivia/assets/Cubone.png',
-            '/static/trivia/assets/Ditto.png',
-            '/static/trivia/assets/Happiny.png',
-            '/static/trivia/assets/Lanturn.png',
-            '/static/trivia/assets/Lopunny.png',
-            '/static/trivia/assets/Luvdisc.png',
-            '/static/trivia/assets/Maractus.png',
-            '/static/trivia/assets/Marowak.png',
-            '/static/trivia/assets/Munchlax.png',
-            '/static/trivia/assets/Munna.png',
-            '/static/trivia/assets/Musharna.png',
-            '/static/trivia/assets/Ponyta.png',
-            '/static/trivia/assets/Quagsire.png',
-            '/static/trivia/assets/Rapidash.png',
-            '/static/trivia/assets/Roselia.png',
-            '/static/trivia/assets/Snorlax.png',
-            '/static/trivia/assets/Staraptor.png',
-            '/static/trivia/assets/Starly.png',
-            '/static/trivia/assets/Swablu.png',
-            '/static/trivia/assets/Torterra.png',
-            '/static/trivia/assets/Turtwig.png',
-            '/static/trivia/assets/Wooper.png',
-            '/static/trivia/assets/Zebstrika.png',
-            '/static/trivia/css/style.css',
-            '/static/hello/assets/icon.png',
-            '/static/trivia/assets/bgm.mp3',
+from django.test import TestCase
+import os
+from django.conf import settings
+
+class StaticFilesTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.urls = [
+                   '/static/trivia/assets/Altaria.png',
+                    '/static/trivia/assets/Blitzle.png',
+                    '/static/trivia/assets/Buneary.png',
+                    '/static/trivia/assets/Chandelure.png',
+                    '/static/trivia/assets/Chinchou.png',
+                    '/static/trivia/assets/Cubone.png',
+                    '/static/trivia/assets/Ditto.png',
+                    '/static/trivia/assets/Happiny.png',
+                    '/static/trivia/assets/Lanturn.png',
+                    '/static/trivia/assets/Lopunny.png',
+                    '/static/trivia/assets/Luvdisc.png',
+                    '/static/trivia/assets/Maractus.png',
+                    '/static/trivia/assets/Marowak.png',
+                    '/static/trivia/assets/Munchlax.png',
+                    '/static/trivia/assets/Munna.png',
+                    '/static/trivia/assets/Musharna.png',
+                    '/static/trivia/assets/Ponyta.png',
+                    '/static/trivia/assets/Quagsire.png',
+                    '/static/trivia/assets/Rapidash.png',
+                    '/static/trivia/assets/Roselia.png',
+                    '/static/trivia/assets/Snorlax.png',
+                    '/static/trivia/assets/Staraptor.png',
+                    '/static/trivia/assets/Starly.png',
+                    '/static/trivia/assets/Swablu.png',
+                    '/static/trivia/assets/Torterra.png',
+                    '/static/trivia/assets/Turtwig.png',
+                    '/static/trivia/assets/Wooper.png',
+                    '/static/trivia/assets/Zebstrika.png',
+                    '/static/trivia/css/style.css',
+                    '/static/hello/assets/icon.png',
+                    '/static/trivia/assets/bgm.mp3',
         ]
 
-        for path in urls:
-            response = requests.get(self.live_server_url + path)
-            self.assertEqual(response.status_code, 200, msg=f"Failed to load: {path}")
+    def test_static_files_accessible(self):
+        for path in self.urls:
+            with self.subTest(path=path):
+                try:
+                    response = self.client.get(path)
+                    self.assertEqual(response.status_code, 200,
+                                     f"Failed to access: {path} (Status: {response.status_code})")
+
+                    # Handle streaming responses
+                    if hasattr(response, 'streaming_content'):
+                        content = b''.join(response.streaming_content)
+                    else:
+                        content = response.content
+
+                    # Special handling for audio files which might be empty in test environment
+                    if not path.endswith('.mp3'):
+                        self.assertGreater(len(content), 0,
+                                           f"Empty content: {path}")
+
+                    # Content-Type checks
+                    if path.endswith('.png'):
+                        self.assertIn('image/png', response['Content-Type'])
+                    elif path.endswith('.gif'):
+                        self.assertIn('image/gif', response['Content-Type'])
+                    elif path.endswith('.webp'):
+                        self.assertIn('image/webp', response['Content-Type'])
+                    elif path.endswith('.mp3'):
+                        self.assertIn('audio/mpeg', response['Content-Type'])
+                    elif path.endswith('.css'):
+                        self.assertIn('text/css', response['Content-Type'])
+
+                except Exception as e:
+                    self.fail(f"Request failed for {path}: {str(e)}")
 
 class BackendAPITests(TestCase):
     def setUp(self):
