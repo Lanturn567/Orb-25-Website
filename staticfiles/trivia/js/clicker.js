@@ -1249,7 +1249,7 @@ function LoginScreen({ onLogin, onSwitchToRegister, onClose }) {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Button
-                            id="login"
+                            name="login"
                             text={isLoading ? "Logging in..." : "Login"}
                             color="#55efc4"
                             type="submit"
