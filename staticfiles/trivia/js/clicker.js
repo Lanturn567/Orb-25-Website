@@ -480,8 +480,8 @@ function Header({ user, onUserUpdate, onNavigate }) {
                     className="header-circle-button"
                     onClick={toggleMute}
                     style={{
-                        width: '48px',
-                        height: '48px',
+                        width: '42px',
+                        height: '42px',
                         borderRadius: '24px',
                         border: '2px solid white',
                         backgroundColor: '#74b9ff',
