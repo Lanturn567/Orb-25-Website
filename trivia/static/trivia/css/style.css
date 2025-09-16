@@ -225,7 +225,7 @@ button:active {
 
 .header-image, .header-gif {
     flex: 1;
-    max-width: 230px;
+    max-width: 150px;
     height: auto;
     max-height: 100%;
     margin-bottom: 10px;
@@ -293,9 +293,8 @@ button:active {
     50%      { transform: scale(1.05); }
 }
 
-
 .header-main {
-    flex: 1;
+    flex: 2;
     justify-content: space-around;
     gap: 15px;
 }
@@ -335,7 +334,6 @@ button:active {
     box-shadow: 0 0 10px rgba(255,215,181, 0.7);
     scale: 100%;
 }
-
 
 .header-circles {
     flex: 1;
