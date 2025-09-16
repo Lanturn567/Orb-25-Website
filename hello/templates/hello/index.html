@@ -498,7 +498,6 @@
             <source src="{% static 'hello/assets/bgm.mp3' %}" type="audio/mpeg" />
         </audio>
 
-        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const volumeButton = document.getElementById('volume-button');
@@ -555,16 +554,16 @@
                     shareMenu.classList.remove('open');
                 });
 
-                // Download button functionality
                 document.querySelectorAll('.download-button').forEach(button => {
                     button.addEventListener('click', function() {
                         const platform = this.classList.contains('windows') ? 'Windows' :
                             this.classList.contains('mac') ? 'Mac' : 'Android';
+                        const originalHTML = this.innerHTML;
                         alert(`Starting download for ${platform} version...\n :D Thanks for playing Pokemon DLKL! :D\n`);
                         this.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Preparing download...`;
                         setTimeout(() => {
-                            this.innerHTML = `Download for ${platform} <span class="download-size">(${this.querySelector('.download-size').textContent})</span>`;
-                        }, 2000);
+                            this.innerHTML = originalHTML;
+                        }, 5000);
                     });
                 });
 

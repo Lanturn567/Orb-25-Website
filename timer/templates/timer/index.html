@@ -61,7 +61,6 @@
     </div>
 </div>
 
-<!-- Add this div near the top of your HTML (right after the body tag) -->
 <div id="spotify-now-playing" class="hidden">
     <div class="now-playing-content">
         <img id="now-playing-album-art" src="{% static 'timer/assets/music-note.png' %}" alt="Album Art">
@@ -766,7 +765,7 @@
                 text: taskText,
                 completed: false,
                 x: Math.random() * (window.innerWidth - 200),
-                y: Math.random() * (window.innerHeight - 100)
+                y: Math.random() * (window.innerHeight - 100) + 50
             });
 
             taskInput.value = '';
@@ -797,7 +796,7 @@
                     <button class="delete-task-btn"><i class="fas fa-trash"></i></button>
                 </div>
             </div>
-        `;
+            `;
 
             // Make task draggable
             makeDraggable(taskEl, index);
@@ -919,7 +918,7 @@
 
             timerSound.muted = isMuted;
 
-            switchMode(currentMode, Math.floor(timeLeft / 60));
+            switchMode(currentMode, Math.ceil(timeLeft / 60));
             updateSessionCounter();
         }
     }
