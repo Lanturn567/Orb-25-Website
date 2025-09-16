@@ -96,26 +96,34 @@ def spotify_callback(request):
 
 @csrf_exempt
 def refresh_token(request):
-    """Refresh expired access token"""
+    """Refresh expired Spotify access token and store in session"""
     try:
         if request.method != 'POST':
             return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-        refresh_token = request.POST.dict().get('refresh_token')
-        data = request.POST.dict()
-        data['client_secret'] = SPOTIFY_CLIENT_SECRET
-
+        refresh_token = request.session.get('spotify_refresh_token')
         if not refresh_token:
-            return JsonResponse({'error': 'Refresh token required'}, status=400)
+            return JsonResponse({'error': 'No refresh token found in session'}, status=400)
+
+        payload = {
+            'grant_type': 'refresh_token',
+            'refresh_token': refresh_token,
+            'client_id': SPOTIFY_CLIENT_ID,
+            'client_secret': SPOTIFY_CLIENT_SECRET,
+        }
 
         token_url = 'https://accounts.spotify.com/api/token'
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
 
-        response = requests.post(token_url, data=data, headers=headers)
+        response = requests.post(token_url, data=payload, headers=headers)
         token_data = response.json()
 
+        if response.status_code != 200 or 'access_token' not in token_data:
+            return JsonResponse({'error': token_data.get('error', 'Failed to refresh token')}, status=400)
+
+        # Update session
         request.session['spotify_access_token'] = token_data['access_token']
         if 'refresh_token' in token_data:
             request.session['spotify_refresh_token'] = token_data['refresh_token']
@@ -124,10 +132,11 @@ def refresh_token(request):
         return JsonResponse({
             'access_token': token_data['access_token'],
             'expires_in': token_data['expires_in'],
-            'refresh_token': refresh_token,
         })
+
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 @csrf_exempt
 def check_spotify_tokens(request):

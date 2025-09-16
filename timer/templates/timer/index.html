@@ -40,7 +40,7 @@
     <div id="spotify-modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>Spotify Playlist</h2>
+            <h2 style="margin-bottom: 0px;">Spotify Playlist</h2>
             <div style="display: flex; justify-content: center;">
                 <button id="login-spotify">Connect Spotify</button>
             </div>
@@ -285,16 +285,7 @@
 
             // Redirect to Spotify auth
             window.location.href = data.auth_url;
-            if (data.access_token) {
-                localStorage.setItem('spotifyAccessToken', data.access_token);
-            }
-            if (data.refresh_token) {
-                localStorage.setItem('spotifyRefreshToken', data.access_token);
-            }
-            if (data.expires_in) {
-                const expiresAt = Date.now() + data.expires_in * 1000;
-                localStorage.setItem('spotifyExpiresAt', expiresAt.toString());
-            }
+
         } catch (error) {
             console.error('Login failed:', error);
             // Reset button state
@@ -309,24 +300,10 @@
 
     async function refreshSpotifyToken() {
         try {
-            const refreshToken = localStorage.getItem('spotifyRefreshToken');
-            if (!refreshToken) {
-                throw new Error('No refresh token found');
-            }
-
-            const payload = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    grant_type: 'refresh_token',
-                    refresh_token: refreshToken,
-                    client_id: SPOTIFY_CONFIG['clientId'],
-                }),
-            }
-
-            const response = await fetch('/timer/refresh_token/', payload);
+            // Call backend to refresh token (session-based)
+            const response = await fetch('/timer/refresh_token/', {
+                method: 'POST'
+            });
 
             if (!response.ok) {
                 throw new Error(`Failed to refresh token: ${response.status}`);
@@ -335,14 +312,16 @@
             const data = await response.json();
 
             if (data.access_token) {
+                // Update the global variable only
                 spotifyAccessToken = data.access_token;
-                localStorage.setItem('spotifyAccessToken', data.access_token);
-                const expiresAt = Date.now() + (data.expires_in * 900);
-                localStorage.setItem('spotifyExpiresAt', expiresAt.toString());
-                if (data.refresh_token) {
-                    localStorage.setItem('spotifyRefreshToken', data.refresh_token);
+
+                // Update token for Spotify SDK if initialized
+                if (spotifyPlayer) {
+                    spotifyPlayer._options.getOAuthToken = cb => cb(spotifyAccessToken);
                 }
                 return true;
+            } else {
+                console.error('No access token returned from refresh endpoint');
             }
         } catch (error) {
             console.error('Token refresh failed:', error);
@@ -607,6 +586,8 @@
     const customMinutesInput = document.getElementById('custom-minutes');
     const setCustomBtn = document.getElementById('set-custom-btn');
 
+    timerSound.volume = 0.5;
+
     document.addEventListener('DOMContentLoaded', async () => {
         try {
             document.getElementById('spotify-controls').style.display = 'none';
@@ -623,7 +604,7 @@
                     spotifyAccessToken = data.access_token;
                     await initializeSpotifyPlayer();
                     updateSpotifyUI(true);
-                } else if (data.refresh_token) {
+                } else if (data.access_token && data.refresh_token) {
                     let refreshed = await refreshSpotifyToken();
                     spotifyAccessToken = refreshed.access_token;
                     if (spotifyAccessToken) {
