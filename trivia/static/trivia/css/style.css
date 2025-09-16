@@ -202,35 +202,29 @@ button:active {
 }
 
 .header-bg {
-    position: relative;
+    position: absolute;
     top: 0;
     left: 0;
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: space-between; /* space between the 3 containers */
     width: 100%;
     overflow: hidden;
-    background-color: rgba(255, 236, 210, 0.9);
-    border-bottom: 1px solid rgba(255, 140, 0, 0.3);
+    background-color: #f8f4ff;
     padding: 10px 20px;
     box-sizing: border-box;
-    height: 120px;
+    height: 80px;
     z-index: 100;
     margin: 0;
 }
 
 .header-images {
-    flex: 4; /* expand to take remaining space */
+    flex: 4;
     display: flex;
-    justify-content: center; /* center images horizontally */
-    align-items: center;
-    overflow-x: auto; /* allow horizontal scroll if too many images */
-    gap: 10px; /* spacing between images */
 }
 
 .header-image, .header-gif {
-    flex: 0 0 auto; /* don't stretch */
+    flex: 1;
     max-width: 230px;
     height: auto;
     max-height: 100%;
@@ -299,10 +293,10 @@ button:active {
     50%      { transform: scale(1.05); }
 }
 
+
 .header-main {
-    flex: 0 0 auto; /* shrink/grow disabled, take natural width */
-    display: flex;
-    align-items: center;
+    flex: 1;
+    justify-content: space-around;
     gap: 15px;
 }
 
@@ -344,7 +338,7 @@ button:active {
 
 
 .header-circles {
-    flex: 0 0 auto; /* take natural width */
+    flex: 1;
     display: flex;
     gap: 10px;
     justify-content: flex-end;
