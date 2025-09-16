@@ -211,7 +211,7 @@ button:active {
     align-items: center;
     width: 100%;
     overflow: hidden;
-    background: linear-gradient(to right, #ff9a8b, #ff6b95, #ff8e53, #ffb347);
+    background-color: #ffe5d4; /* soft peach */
     padding: 10px 20px;
     box-sizing: border-box;
     height: 80px;
