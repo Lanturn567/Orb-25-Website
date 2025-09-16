@@ -207,6 +207,7 @@ button:active {
     left: 0;
     display: flex;
     flex-wrap: nowrap;
+    justify-content: center;
     align-items: center;
     width: 100%;
     overflow: hidden;
