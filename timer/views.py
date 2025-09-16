@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 SPOTIFY_CLIENT_ID = 'b6fe7a331be848d38f7381b58552ad54'
 SPOTIFY_CLIENT_SECRET = 'f4135c009e904493adbcca18ce41ddec'
-SPOTIFY_REDIRECT_URI = 'http://127.0.0.1:8000/timer/spotify_callback/'
+SPOTIFY_REDIRECT_URI = 'https://orb-25-website.onrender.com/timer/spotify_callback'
 
 
 # Create your views here.
@@ -115,6 +115,11 @@ def refresh_token(request):
 
         response = requests.post(token_url, data=data, headers=headers)
         token_data = response.json()
+
+        request.session['spotify_access_token'] = token_data['access_token']
+        if 'refresh_token' in token_data:
+            request.session['spotify_refresh_token'] = token_data['refresh_token']
+        request.session['spotify_expires_at'] = time.time() + token_data['expires_in']
 
         return JsonResponse({
             'access_token': token_data['access_token'],

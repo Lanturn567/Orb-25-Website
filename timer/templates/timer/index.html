@@ -142,16 +142,6 @@
     let currentTrack = null;
     let spotifySDKLoaded = false;
 
-    function getUrlParams() {
-        const params = new URLSearchParams(window.location.search);
-        let wish = {
-            code: params.get('code') || null,
-            error: params.get('error') || null
-        };
-        console.log(wish);
-        return wish;
-    }
-
     // Helper function to show error messages
     // Global variables to manage toast stacking
     let toastCount = 0;
@@ -398,19 +388,16 @@
             volume: 0.2
         });
 
-        // Add error listeners
-        spotifyPlayer.addListener('initialization_error', ({ message }) => {
+        // Error listeners
+        spotifyPlayer.on('initialization_error', ({ message }) => {
             console.error('Initialization Error:', message);
             showErrorToast(`Spotify Error: ${message}`);
         });
 
-        spotifyPlayer.addListener('authentication_error', async ({ message }) => {
+        spotifyPlayer.on('authentication_error', async ({ message }) => {
             const refreshed = await refreshSpotifyToken();
             if (refreshed) {
-                // Update token provider in SDK
                 spotifyPlayer._options.getOAuthToken = cb => cb(spotifyAccessToken);
-
-                // Now reconnect
                 spotifyPlayer.connect();
             } else {
                 updateSpotifyUI(false);
@@ -419,19 +406,19 @@
             }
         });
 
-        spotifyPlayer.addListener('account_error', ({ message }) => {
+        spotifyPlayer.on('account_error', ({ message }) => {
             console.error('Account Error:', message);
             showErrorToast(`Spotify Account Error: ${message}`);
             updateSpotifyUI(false);
         });
 
-        spotifyPlayer.addListener('playback_error', ({ message }) => {
+        spotifyPlayer.on('playback_error', ({ message }) => {
             console.error('Playback Error:', message);
             showErrorToast(`Playback Error: ${message}`);
         });
 
-        // Add success listeners
-        spotifyPlayer.addListener('ready', ({ device_id }) => {
+        // Success listeners
+        spotifyPlayer.on('ready', ({ device_id }) => {
             console.log('Device Ready:', device_id);
             deviceId = device_id;
             localStorage.setItem('spotifyDeviceId', device_id);
@@ -440,23 +427,20 @@
                 playSpotifyPlaylist(SPOTIFY_CONFIG.playlistId);
             } else if (spotifyPlayer) {
                 spotifyPlayer.connect().then(success => {
-                    if (success) {
-                        playSpotifyPlaylist(SPOTIFY_CONFIG.playlistId);
-                    }
+                    if (success) playSpotifyPlaylist(SPOTIFY_CONFIG.playlistId);
                 });
                 spotifyPlayer.pause();
             }
             getPlayerState();
         });
 
-        spotifyPlayer.addListener('not_ready', ({ device_id }) => {
+        spotifyPlayer.on('not_ready', ({ device_id }) => {
             console.log('Device Disconnected:', device_id);
             deviceId = null;
             localStorage.removeItem('spotifyDeviceId');
         });
 
-        // Update the player_state_changed listener
-        spotifyPlayer.addListener('player_state_changed', state => {
+        spotifyPlayer.on('player_state_changed', state => {
             if (state) {
                 currentTrack = state.track_window?.current_track;
                 updateNowPlaying();
@@ -629,14 +613,25 @@
             document.getElementById('login-spotify').style.display = 'block';
             document.getElementById('spotify-loading').style.display = 'none';
 
-            // Instead of checking URL params, just check with backend:
             const response = await fetch('/timer/check_spotify_tokens/');
             if (response.ok) {
                 const data = await response.json();
-                if (data.access_token) {
+                const now = Date.now() / 1000; // current time in seconds
+
+                if (data.access_token && data.expires_at && data.expires_at > now) {
+                    // Access token valid
                     spotifyAccessToken = data.access_token;
                     await initializeSpotifyPlayer();
                     updateSpotifyUI(true);
+                } else if (data.refresh_token) {
+                    let refreshed = await refreshSpotifyToken();
+                    spotifyAccessToken = refreshed.access_token;
+                    if (spotifyAccessToken) {
+                        await initializeSpotifyPlayer();
+                        updateSpotifyUI(true);
+                    } else {
+                        updateSpotifyUI(false);
+                    }
                 } else {
                     updateSpotifyUI(false);
                 }
