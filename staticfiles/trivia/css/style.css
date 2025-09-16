@@ -202,7 +202,7 @@ button:active {
 }
 
 .header-bg {
-    position: absolute;
+    position: relative;
     top: 0;
     left: 0;
     display: flex;
@@ -210,7 +210,7 @@ button:active {
     align-items: center;
     width: 100%;
     overflow: hidden;
-    background-color: #f8f4ff;
+    background-color: #f8bbd0;
     padding: 10px 20px;
     box-sizing: border-box;
     height: 80px;
@@ -221,13 +221,14 @@ button:active {
 .header-images {
     flex: 4;
     display: flex;
+    align-items: center;
+    overflow: hidden;
 }
 
 .header-image, .header-gif {
     flex: 1;
-    max-width: 150px;
+    max-width: 180px;
     height: auto;
-    max-height: 100%;
     margin-bottom: 10px;
     margin-top: 10px;
     margin-left: 15px;
@@ -293,8 +294,9 @@ button:active {
     50%      { transform: scale(1.05); }
 }
 
+
 .header-main {
-    flex: 2;
+    flex: 1;
     justify-content: space-around;
     gap: 15px;
 }
@@ -334,6 +336,7 @@ button:active {
     box-shadow: 0 0 10px rgba(255,215,181, 0.7);
     scale: 100%;
 }
+
 
 .header-circles {
     flex: 1;

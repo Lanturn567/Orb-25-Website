@@ -339,12 +339,10 @@ function Header({ user, onUserUpdate, onNavigate }) {
     React.useEffect(() => {
         const audio = audioRef.current;
         if (!audio) {
-            console.log("No set vol")
             return;
         }
 
         const setVolume = () => {
-            console.log("set vol")
             audio.volume = 0.2;
         };
 
