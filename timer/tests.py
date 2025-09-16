@@ -92,19 +92,12 @@ class TimerViewsTests(TestCase):
         }
         mock_post.return_value = mock_response
 
-        data = {
-            "grant_type": "refresh_token",
-            "refresh_token": "new_refresh_token",
-            "client_id": "b6fe7a331be848d38f7381b58552ad54"
-        }
+        # Set refresh token in session
+        session = self.client.session
+        session['spotify_refresh_token'] = 'existing_refresh_token'
+        session.save()
 
-        encoded_data = urlencode(data)
-
-        response = self.client.post(
-            reverse('timer:refresh_token'),
-            data=encoded_data,
-            content_type='application/x-www-form-urlencoded'
-        )
+        response = self.client.post(reverse('timer:refresh_token'))
 
         self.assertEqual(response.status_code, 200)
 
@@ -114,14 +107,13 @@ class TimerViewsTests(TestCase):
         self.assertEqual(data['access_token'], 'new_access_token')
         self.assertEqual(data['expires_in'], 3600)
 
-        # Check the forwarded data to Spotify includes client_secret
         mock_post.assert_called_once_with(
             'https://accounts.spotify.com/api/token',
             data={
                 'grant_type': 'refresh_token',
-                'refresh_token': 'new_refresh_token',
+                'refresh_token': 'existing_refresh_token',
                 'client_id': 'b6fe7a331be848d38f7381b58552ad54',
-                'client_secret': 'f4135c009e904493adbcca18ce41ddec'
+                'client_secret': 'f4135c009e904493adbcca18ce41ddec',
             },
             headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
@@ -130,7 +122,7 @@ class TimerViewsTests(TestCase):
         response = self.client.post(reverse('timer:refresh_token'))
         self.assertEqual(response.status_code, 400)
         data = json.loads(response.content)
-        self.assertEqual(data['error'], 'Refresh token required')
+        self.assertEqual(data['error'], 'No refresh token found in session')
 
     def test_check_spotify_tokens_with_tokens(self):
         # Create request with session tokens
