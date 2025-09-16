@@ -9,10 +9,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
 from .models import CustomUser
-from django.middleware.csrf import get_token
-
-def get_csrf_token(request):
-    return JsonResponse({'csrfToken': get_token(request)})
 
 @csrf_exempt
 @login_required

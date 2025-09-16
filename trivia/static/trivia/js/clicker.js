@@ -337,6 +337,12 @@ function Header({ user, onUserUpdate, onNavigate }) {
     const isFirstClick = React.useRef(true);
 
     React.useEffect(() => {
+        if (audioRef) {
+            audioRef.volume = 0.4;
+        }
+    }, [audioRef]);
+
+    React.useEffect(() => {
         const handleFirstClick = () => {
             const audio = audioRef.current;
             if (isFirstClick.current) {
