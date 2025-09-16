@@ -208,6 +208,7 @@ button:active {
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
+    justify-content: space-between; /* space between the 3 containers */
     width: 100%;
     overflow: hidden;
     background-color: rgba(255, 236, 210, 0.9);
@@ -220,12 +221,16 @@ button:active {
 }
 
 .header-images {
-    flex: 4;
+    flex: 4; /* expand to take remaining space */
     display: flex;
+    justify-content: center; /* center images horizontally */
+    align-items: center;
+    overflow-x: auto; /* allow horizontal scroll if too many images */
+    gap: 10px; /* spacing between images */
 }
 
 .header-image, .header-gif {
-    flex: 1;
+    flex: 0 0 auto; /* don't stretch */
     max-width: 230px;
     height: auto;
     max-height: 100%;
@@ -295,8 +300,9 @@ button:active {
 }
 
 .header-main {
-    flex: 1;
-    justify-content: space-around;
+    flex: 0 0 auto; /* shrink/grow disabled, take natural width */
+    display: flex;
+    align-items: center;
     gap: 15px;
 }
 
@@ -338,13 +344,14 @@ button:active {
 
 
 .header-circles {
-    flex: 1;
+    flex: 0 0 auto; /* take natural width */
     display: flex;
     gap: 10px;
+    justify-content: flex-end;
+    align-items: center;
     margin-right: 40px;
     margin-top: 0;
     margin-bottom: 0;
-    justify-content: right;
 }
 
 .header-circle-button {
