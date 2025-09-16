@@ -211,7 +211,7 @@ button:active {
     align-items: center;
     width: 100%;
     overflow: hidden;
-    background-color: #f8bbd0;
+    background: linear-gradient(to right, #ff9a8b, #ff6b95, #ff8e53, #ffb347);
     padding: 10px 20px;
     box-sizing: border-box;
     height: 80px;
@@ -220,7 +220,7 @@ button:active {
 }
 
 .header-images {
-    flex: 4;
+    flex: 4.5;
     display: flex;
     align-items: center;
     overflow: hidden;
@@ -297,7 +297,7 @@ button:active {
 
 
 .header-main {
-    flex: 1;
+    flex: 0.5;
     justify-content: space-around;
     gap: 15px;
 }
