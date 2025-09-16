@@ -348,9 +348,8 @@ function Header({ user, onUserUpdate, onNavigate }) {
             audio.volume = 0.2;
         };
 
-        audio.addEventListener('loadedmetadata', setVolume);
-        return () => audio.removeEventListener('loadedmetadata', setVolume);
-    }, []);
+        setVolume();
+    }, [audioRef]);
 
 
     React.useEffect(() => {
