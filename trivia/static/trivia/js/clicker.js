@@ -338,7 +338,7 @@ function Header({ user, onUserUpdate, onNavigate }) {
 
     React.useEffect(() => {
         if (audioRef.current) {
-            audioRef.current.volume = 0.4;
+            audioRef.current.volume = 0.2;
         }
     }, []);
 
